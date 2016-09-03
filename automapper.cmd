@@ -31,10 +31,20 @@ go:
   go.retry:
     matchre return ^Obvious (paths|exits)|^It's pitch dark
     matchre go.retry ^\.\.\.wait|^Sorry, you may only|^Sorry, system is slow|^You can't ride your \w+ broom in that direction
+    matchre on_steps You begin climbing|You really should concentrate
     matchre retreat ^You are engaged
     put %dir
     matchwait 3
     goto go.retry
+
+on_steps:
+  matchre finished_steps You reach the end
+  matchwait 30
+  return
+
+finished_steps:
+  pause 1
+  return
 
 retreat:
   put retreat
