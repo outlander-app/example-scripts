@@ -5,6 +5,8 @@
 
 # debug 5
 
+if $standing = 0 then put stand
+
 top:
   if_1 then {
     gosub go %1
@@ -24,26 +26,25 @@ go:
   if matchre("%dir", "^(search|swim|climb|web|muck|rt|wait|slow|drag|script|room|ice) ") then
   {
     var type $1
-    echo %type
     eval dir replacere("%dir", "^(search|swim|web|muck|rt|wait|slow|script|room|ice) ", "")
+  }
+
+  if %type = search {
+    gosub %type
   }
 
   go.retry:
     matchre return ^Obvious (paths|exits)|^It's pitch dark
     matchre go.retry ^\.\.\.wait|^Sorry, you may only|^Sorry, system is slow|^You can't ride your \w+ broom in that direction
-    matchre on_steps You begin climbing|You really should concentrate
     matchre retreat ^You are engaged
+    matchre stand while sitting|while kneeling|while lying down
     put %dir
     matchwait 3
     goto go.retry
 
-on_steps:
-  matchre finished_steps You reach the end
-  matchwait 30
-  return
-
-finished_steps:
-  pause 1
+search:
+  put search
+  pause
   return
 
 retreat:
@@ -52,10 +53,15 @@ retreat:
   pause 0.5
   goto go.retry
 
+stand:
+  put stand
+  pause 0.5
+  goto go.retry
+
 powerwalk:
 
   if $Attunement.LearningRate >= 34 {
-    put #var powerwalk 0
+    # put #var powerwalk 0
     return
   }
 
@@ -71,5 +77,5 @@ stop.play:
   goto powerwalk
 
 end:
-  put #var powerwalk 0
+  # put #var powerwalk 0
   put #parse YOU HAVE ARRIVED

@@ -1,9 +1,9 @@
 #
-#  hunt.cmd - version 0.3
-#  Requires Outlander 0.6.7 or higher
+#  hunt.cmd - version 0.5
+#  Requires Outlander 0.10.11 or higher
 #
 
-debuglevel 5
+# debuglevel 5
 
 #
 #  User defined variables
@@ -31,6 +31,7 @@ var use_offhand NO
 var check_exp NO
 var exp_type
 var exp_threshold 15
+var max_exp 34
 var weapon
 var attack_style attack
 var is_thrown NO
@@ -39,9 +40,13 @@ var sheath_style sheath
 var should_stealth NO
 var FULL_AIM NO
 var ranged_hidden_attack poach
+var ranged_action
 var use_screams NO
 var hide_if_locked NO
 var arrange_action arrange
+var tm_mode NO
+var tm_spell
+var tm_mana
 
 #
 #  Critter variables
@@ -116,6 +121,14 @@ exp:
   echo
   var check_exp YES
   var exp_threshold 15
+
+  if matchre("%2", "^\d+$") then {
+    var exp_threshold %2
+    shift
+  }
+
+  if %exp_threshold > %max_exp then var exp_threshold %max_exp
+
   return
 
 ambush:
@@ -143,14 +156,33 @@ scream:
   return
 
 arrange:
-  var arrange_action arrange all
+  if matchre("%2", "^\d+$") then {
+    var arrange %2
+    shift
+  }
+
+  if %arrange > 5 then var arrange 5
+
+  if "%2" == "all" then {
+    var arrange_action arrange all
+    shift
+  }
+
+  return
+
+tm:
+  var tm_mode YES
+  shift
+  var tm_spell %1
+  shift
+  var tm_mana %1
   return
 
 wield:
 
   if %weapon = log || %weapon = rock then goto appraise_weapon
 
-  matchre appraise_weapon You draw|You slip|already holding
+  matchre appraise_weapon You draw|You slip|already holding|You deftly
   matchre remove_weapon remove it first
   matchre no_weapon Wield what?
   matchre get_weapon as it is lying at your feet
@@ -216,9 +248,14 @@ checkinfo:
 begin:
 
   if %is_ranged = YES then {
-  	action (ranged) var FULL_AIM YES when You think you have your best shot possible
-  	action (ranged) var FULL_AIM NO when stop concentrating on aiming
+    action (ranged) var FULL_AIM YES when You think you have your best shot possible
+    action (ranged) var FULL_AIM NO when stop concentrating on aiming
     goto ranged_combat
+  }
+
+  if %tm_mode = YES then {
+    put .tmhelper
+    goto tm_combat
   }
 
 attack:
@@ -257,10 +294,11 @@ ranged_combat:
   pause 0.5
 
   if %guild = Bard && %use_screams = YES then gosub bard
+  if %guild = Ranger && %skill = Bow then var ranged_action arrows
 
   gosub load
   gosub aim
-  if $hidden = 0 && %should_stealth = YES then gosub stealth
+  if %should_stealth = YES then gosub stealth
   gosub aiming
   gosub fire
 
@@ -274,7 +312,7 @@ aiming:
     return
   }
   action (ranged) off
-	waitforre best shot possible|You stop concentrating on aiming your weapon.
+  waitforre best shot possible|You stop concentrating on aiming your weapon.
   var FULL_AIM NO
   action (ranged) on
   return
@@ -282,7 +320,7 @@ aiming:
 aim:
   matchre aim.after.load isn't loaded
   matchre aim.fire already targetting that
-	matchre return best shot possible now|begin to target|You shift your
+  matchre return best shot possible now|begin to target|You shift your
   matchre wait_for_mobs ^There is nothing else to face!|^What are you trying to attack
   send aim
   matchwait 5
@@ -297,29 +335,29 @@ aim.after.load:
   goto aim
 
 fire:
-	matchre fire You can not poach|are not hidden
-	matchre return ^I could not find what you were|isn't loaded|Roundtime
+  matchre fire You can not poach|are not hidden
+  matchre return ^I could not find what you were|isn't loaded|Roundtime
   if $hidden = 1 then send %ranged_hidden_attack
   else send fire
   matchwait 5
   goto fire
 
 load:
-		matchre gather_ammo ^You don't have the proper ammunition readily available for your
-		matchre gather_ammo ^You must|your hand jams|^You can not load
-		# matchre RANGE_REMOVE_CHECK (\w+) makes the task more difficult|while wearing a (.+)|while wearing an (.+)
-		# matchre Repeater.Load ammunition chamber|already loaded with as much ammunition as it can hold
-		matchre return Roundtime|is already
+    matchre gather_ammo ^You don't have the proper ammunition readily available for your
+    matchre gather_ammo ^You must|your hand jams|^You can not load
+    # matchre RANGE_REMOVE_CHECK (\w+) makes the task more difficult|while wearing a (.+)|while wearing an (.+)
+    # matchre Repeater.Load ammunition chamber|already loaded with as much ammunition as it can hold
+    matchre return Roundtime|is already
     var FULL_AIM NO
-  	put load arrows
-  	matchwait 5
+    put load %ranged_action
+    matchwait 5
     goto load
 
 gather_ammo:
 
   ammo.loop:
-		matchre return ^Stow what|^You must unload|^You get some
-		matchre ammo.loop ^You pick up|^You put|^You stow|^You get
+    matchre return ^Stow what|^You must unload|^You get some
+    matchre ammo.loop ^You pick up|^You put|^You stow|^You get
     pause 0.5
     put stow %ranged_ammo
     matchwait
@@ -369,12 +407,16 @@ check_loot:
   gosub health
   if matchre("$roomobjs", "(%skinnablecritters) ((which|that) appears dead|\(dead\))") then gosub skin
   if matchre("$roomobjs", "((which|that) appears dead|\(dead\))") then {
+    gosub stats
     send %loot_option
     gosub handle_loot
     if %is_ranged = YES {
       gosub gather_ammo
+      gosub check_exp
     }
-    gosub stats
+  }
+
+  if %is_ranged != YES {
     gosub check_exp
   }
 
@@ -384,6 +426,51 @@ check_loot:
 get_thrown:
   if %is_thrown = YES then put get my %weapon
   return
+
+#
+#  TM Combat
+#
+
+tm_combat:
+  var skill Targeted_Magic
+  gosub clear
+
+  var last_combat tm_combat
+
+  pause 0.5
+
+  if %guild = Bard && %use_screams = YES then gosub bard
+
+  gosub tm_prep
+  gosub tm_aiming
+  gosub tm_cast
+
+  gosub check_loot
+
+  goto tm_combat
+
+tm_prep:
+  put target %tm_spell %tm_mana
+  match RETURN You begin to weave
+  match tm_quick_cast But you're already preparing a spell!
+  matchwait 2
+  goto tm_prep
+  return
+
+tm_aiming:
+  waitforre Your formation of a targeting pattern
+  pause 0.5
+  return
+
+tm_cast:
+  put cast
+  pause 0.5
+  return
+
+tm_quick_cast:
+  put cast
+  pause 0.5
+  goto tm_prep
 
 check_exp:
   if %check_exp = YES {
@@ -427,12 +514,17 @@ do_arrange:
   var count 0
   arrange.loop:
     if %count < %arrange {
+      matchre RETURN You complete arranging|That has already been arranged as much as you can manage
+      matchre arrange_add Roundtime
       put %arrange_action
-      pause 2
-      math count add 1
+      matchwait 3
       goto arrange.loop
     }
   return
+
+arrange_add:
+  math count add 1
+  goto arrange.loop
 
 handle_loot:
   pause 1
@@ -477,6 +569,7 @@ toggle.scream:
 
 health:
   if $health <= %health_threshold {
+    gosub clear
     goto abort
   }
   return
@@ -525,29 +618,36 @@ aborted:
   if %is_ranged = YES then gosub gather_ammo
   gosub sheath_weapon
   put #parse HUNT ABORTED
+  put look
   exit
 
 sheath_weapon:
   if %is_ranged = YES then gosub ranged_unload
 
-	matchre wear_weapon where\?
-	matchre return ^You sheath|^You sling|^You attach|^You strap|^With a flick of your wrist|^You hang|you sheath|^Sheathe what\?|^You easily strap|^With fluid and stealthy movements|^You slip|^You secure
+  pause 0.5
+
+  matchre wear_weapon where\?
+  matchre return ^You sheath|^You sling|^You attach|^You strap|^With a flick of your wrist|^You hang|you sheath|^Sheathe what\?|^You easily strap|^With fluid and stealthy movements|^You slip|^You secure
   send %sheath_style my %weapon
   matchwait
 
 wear_weapon:
-	matchre stow_weapon You can't wear that!|can't wear any more items like that
-	matchre return You sling|Wear what?|You attach
-	put wear my %weapon
-	matchwait
+  pause 0.5
+  matchre stow_weapon You can't wear that!|can't wear any more items like that
+  matchre return You sling|Wear what?|You attach
+  put wear my %weapon
+  matchwait
 
 stow_weapon:
-	matchre return You put|easily strap|already in your inventory
-	put stow my %weapon
-	matchwait
+  pause 0.5
+  matchre return You put|easily strap|already in your inventory
+  put stow my %weapon
+  matchwait
 
 end:
   if %is_ranged = YES then gosub gather_ammo
+  if %tm_mode = YES then put #script abort tmhelper
+
   gosub sheath_weapon
 
   if $righthand != Empty then send stow right

@@ -80,6 +80,13 @@ cinq:
   gosub book 2
   goto %smithspeed
 
+# 250 -?
+vest:
+  var itemDesc a metal mail vest
+  var book armorsmithing
+  gosub book 1
+  goto %smithspeed
+
 book:
   var chapter $1
   put get my %book book

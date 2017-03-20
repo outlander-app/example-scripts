@@ -1,4 +1,4 @@
-# debuglevel 5
+debuglevel 5
 
 var container $primary.container
 var hammer $forging.hammer
@@ -73,7 +73,7 @@ GetBook:
   gosub get.tool tongs
 
 firstpound:
-  put pound ingot with my hammer
+  put pound ingot on anvil with my hammer
   goto matches
 
 get.tool:
@@ -143,7 +143,8 @@ armordone:
   pause 1
   put get %item on anvil
 
-  gosub small.padding
+  if "%need_largepadding" = "YES" then gosub large.padding
+  if "%need_smallpadding" = "YES" then gosub small.padding
   return
 
 pliers:
@@ -238,6 +239,11 @@ cord:
 small.padding:
   pause 0.5
   gosub Assemble small padding
+  return
+
+large.padding:
+  pause 0.5
+  gosub Assemble large padding
   return
 
 Assemble:
