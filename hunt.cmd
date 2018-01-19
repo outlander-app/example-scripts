@@ -19,8 +19,10 @@ var berserk_on_fatigue YES
 var fatigue_berserk avalanche
 var bard_scream havoc
 var sling_ammo shard
-var crossbow_ammo bolt
+var crossbow_ammo quadrello
+var repating_crossbow_ammo_count 4
 var bow_ammo arrow
+var brawling_moves elbow|jab|kick|punch
 
 
 #
@@ -47,6 +49,8 @@ var arrange_action arrange
 var tm_mode NO
 var tm_spell
 var tm_mana
+var brawl NO
+var invoke_weapon NO
 
 #
 #  Critter variables
@@ -93,9 +97,17 @@ start:
   gosub wield
   goto begin
 
+brawl:
+  var brawl YES
+  return
+
 throw:
   var attack_style throw
   var is_thrown YES
+  return
+
+invoke:
+  var invoke_weapon YES
   return
 
 lob:
@@ -180,7 +192,7 @@ tm:
 
 wield:
 
-  if %weapon = log || %weapon = rock then goto appraise_weapon
+  if "%weapon" = "log" || "%weapon" = "rock" then goto appraise_weapon
 
   matchre appraise_weapon You draw|You slip|already holding|You deftly
   matchre remove_weapon remove it first
@@ -237,7 +249,7 @@ remove_weapon:
   goto appraise_weapon
 
 checkinfo:
-  put info
+  put info;enc
   waitfor Encumbrance
   action (info) off
   return
@@ -250,6 +262,7 @@ begin:
   if %is_ranged = YES then {
     action (ranged) var FULL_AIM YES when You think you have your best shot possible
     action (ranged) var FULL_AIM NO when stop concentrating on aiming
+    if %should_stealth != YES then { put .tmhelper }
     goto ranged_combat
   }
 
@@ -257,6 +270,12 @@ begin:
     put .tmhelper
     goto tm_combat
   }
+
+  if %brawl = YES then {
+    goto brawling_combat
+  }
+
+  goto attack
 
 attack:
   gosub clear
@@ -270,10 +289,15 @@ attack:
 
   matchre check_loot Roundtime
   matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
+  match do_get_thrown What are you trying to throw
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
   matchwait 10
   goto attack
+
+do_get_thrown:
+  gosub get_thrown
+  goto %last_combat
 
 wait_for_mobs:
   gosub clear
@@ -343,15 +367,42 @@ fire:
   goto fire
 
 load:
+  if matchre("$righthand", "riot|repeating") then goto Repeater.Load
+
+  matchre gather_ammo ^You don't have the proper ammunition readily available for your
+  matchre gather_ammo ^You must|your hand jams|^You can not load
+  matchre Repeater.Load ammunition chamber|already loaded with as much ammunition as it can hold
+  matchre return Roundtime|is already
+  var FULL_AIM NO
+  put load %ranged_action
+  matchwait 5
+  goto load
+
+Repeater.Load:
+  if "$lefthand" != "Empty" then put stow $lefthandnoun
+  matchre RETURN A rapid series of clicks emanate|already loaded with as much ammunition as it can hold|readying more than one bolt could
+  matchre Repeater.Load.Full exhausted the crossbow's ammunition store
+  var FULL_AIM NO
+  put push my $righthandnoun
+  matchwait 10
+  goto Repeater.Load
+
+Repeater.Load.Full:
+  var load_count 0
+  gosub gather_ammo
+
+  Repeater.Load.Full.2:
+    if "%guild" != "Ranger" && "$lefthand" = "Empty" then put get my %ranged_ammo
+    math load_count add 1
+    if %load_count > %repating_crossbow_ammo_count then goto Repeater.Load
+
     matchre gather_ammo ^You don't have the proper ammunition readily available for your
     matchre gather_ammo ^You must|your hand jams|^You can not load
-    # matchre RANGE_REMOVE_CHECK (\w+) makes the task more difficult|while wearing a (.+)|while wearing an (.+)
-    # matchre Repeater.Load ammunition chamber|already loaded with as much ammunition as it can hold
-    matchre return Roundtime|is already
-    var FULL_AIM NO
-    put load %ranged_action
-    matchwait 5
-    goto load
+    matchre Repeater.Load already loaded with as much ammunition as it can hold
+    matchre Repeater.Load.Full.2 ammunition chamber
+    put load
+    matchwait 10
+    goto Repeater.Load.Full.2
 
 gather_ammo:
 
@@ -388,7 +439,7 @@ hide:
   # if (%guild = Thief || %guild = Ranger) && %circle >= 50 then goto stalk
 
   match hide ...
-  matchre hide Your attempt to hide fails|notices your
+  matchre hide Your attempt to hide fails|notices your|ruining your hiding place
   matchre stalk You blend in with your surroundings|You melt into the background|already hidden
   pause 0.5
   put hide
@@ -396,7 +447,7 @@ hide:
 
 stalk:
   match stalk ...
-  matchre hide You must be hidden first|try being out of sight
+  matchre hide You must be hidden first|try being out of sight|ruining your hiding place
   matchre return You move into position to stalk|already|There is nothing else to face|Stalk what|Face what
   pause 0.5
   put stalk
@@ -424,8 +475,20 @@ check_loot:
   goto %last_combat
 
 get_thrown:
+  pause 0.5
+  if %invoke_weapon = YES then {
+    goto get_invoke
+  }
+
   if %is_thrown = YES then put get my %weapon
+
   return
+
+get_invoke:
+  matchre RETURN suddenly leaps|any bonds to invoke
+  put invoke
+  matchwait 5
+  goto get_invoke
 
 #
 #  TM Combat
@@ -449,13 +512,18 @@ tm_combat:
 
   goto tm_combat
 
+tm_wait:
+  put release spell
+  pause 2
+  goto tm_combat
+
 tm_prep:
-  put target %tm_spell %tm_mana
   match RETURN You begin to weave
-  match tm_quick_cast But you're already preparing a spell!
+  match tm_wait nothing else to face
+  matchre tm_quick_cast But you're already preparing a spell!|You are already preparing
+  put target %tm_spell %tm_mana
   matchwait 2
   goto tm_prep
-  return
 
 tm_aiming:
   waitforre Your formation of a targeting pattern
@@ -471,6 +539,28 @@ tm_quick_cast:
   put cast
   pause 0.5
   goto tm_prep
+
+#
+# Brawling
+#
+
+brawling_combat:
+
+  gosub clear
+  var last_combat brawling_combat
+
+  pause 0.5
+
+  if %guild = Bard && %use_screams = YES then gosub bard
+
+  if $hidden = 0 && %should_stealth = YES then gosub stealth
+
+  matchre check_loot Roundtime
+  matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
+  if %use_offhand == YES then put %attack_style left
+  else put %attack_style
+  matchwait 10
+  goto brawling_combat
 
 check_exp:
   if %check_exp = YES {
@@ -514,7 +604,7 @@ do_arrange:
   var count 0
   arrange.loop:
     if %count < %arrange {
-      matchre RETURN You complete arranging|That has already been arranged as much as you can manage
+      matchre RETURN You complete arranging|That has already been arranged as much as you can manage|Arrange what
       matchre arrange_add Roundtime
       put %arrange_action
       matchwait 3
@@ -600,7 +690,7 @@ abort:
 
   abort.loop:
 
-    if %abort_count >= 3 {
+    if %abort_count >= 10 {
       goto aborted
     }
 
@@ -646,12 +736,14 @@ stow_weapon:
 
 end:
   if %is_ranged = YES then gosub gather_ammo
-  if %tm_mode = YES then put #script abort tmhelper
+  put #script abort tmhelper
 
   gosub sheath_weapon
 
   if $righthand != Empty then send stow right
   if $lefthand != Empty then send stow left
+
+  put look
 
   put #beep
   put #parse HUNT DONE

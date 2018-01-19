@@ -33,7 +33,7 @@ go:
     eval dir replacere("%dir", "^(script |search|swim|web|muck|rt|wait|slow|script|room|ice) ", "")
   }
 
-  if matchre("%dir", "^(objsearch) (\S+) (.+)") then
+  if matchre("%dir", "(objsearch) (\S+) (.+)") then
   {
     var type objsearch
     var searchObj $2
@@ -50,11 +50,11 @@ go:
   }
 
 go.retry:
-  matchre return ^Obvious (paths|exits)|^It's pitch dark
-  matchre go.retry ^\.\.\.wait|^Sorry, you may only|^Sorry, system is slow|^You can't ride your \w+ broom in that direction
+  matchre return Obvious (paths|exits)|It's pitch dark
+  matchre go.retry \.\.\.wait|Sorry, you may only|Sorry, system is slow|You can't ride your \w+ broom in that direction
   matchre on_steps You begin climbing|You really should concentrate
-  matchre retreat ^You are engaged
-  matchre stand while sitting|while kneeling|while lying down
+  matchre retreat You are engaged
+  matchre stand while sitting|while kneeling|while lying down|must be standing
   put %dir
   matchwait 3
   goto go.retry
@@ -115,7 +115,7 @@ powerwalk:
     return
   }
   matchre stop.play too busy performing
-  matchre return ^Roundtime|^Something in the area is interfering
+  matchre return Roundtime|Something in the area is interfering
   put power
   matchwait 1
   return
