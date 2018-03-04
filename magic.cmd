@@ -1,5 +1,5 @@
 #[Magic]: Casting spells
-debug 5
+# debug 5
 
 ## customizable variables
 

@@ -720,8 +720,6 @@ health:
 
 bundle:
 
-  debug 5
-
   if "%drop_skins" == "YES" then
   {
     goto dropSkin
