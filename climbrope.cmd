@@ -6,8 +6,9 @@ var container kit
 
 var maxexp $Athletics.LearningRate
 math maxexp add 12
-if %maxexp >= 34 then
+if %maxexp >= 34 then {
 	var maxexp 34
+}
 var play YES
 var target %1
 

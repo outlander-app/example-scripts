@@ -103,10 +103,4 @@ End:
   put #beep
   put #parse COMBAT DONE
 
-  if $zoneid = 69 {
-    put #goto 5
-  }
-
-  if $zoneid = 4 {
-    put #goto 411
-  }
+  put .aftercombat
