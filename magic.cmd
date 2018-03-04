@@ -1,18 +1,55 @@
 #[Magic]: Casting spells
-debuglevel 5
+debug 5
 
-var snapCast OFF
+## customizable variables
+
 var cambItem $camb_item
-var magicToTrain $Magic.Training
+var spellPrep With tense movements you|You begin chanting|With rigid movements
 
-var maxexp $%magicToTrain.LearningRate
-math maxexp add 15
-if %maxexp >= 34 then
+
+##########################################
+## main script
+##########################################
+
+ECHO *******************************
+ECHO **
+ECHO **
+ECHO ** When starting the script, type .magic <spell> <spell prep amount> <charge cambrinth amount> <skill>
+ECHO **
+ECHO ** ex: .magic ease 2 3 Augmentation
+ECHO **
+ECHO ** Optional arguments: .magic ease 2 3 Agumentation maxexp
+ECHO ** "maxexp" will run until the skill is locked
+ECHO **
+ECHO ** Change var cambItem for your cambrinth
+ECHO ** Change var spellPrep for your spell preparation
+ECHO **
+ECHO *******************************
+
+var magicToTrain %4
+var snapCast OFF
+
+if_5 then
 {
-	var maxexp 34
+  goto begin
 }
 
-goto Start
+if_4 then
+{
+  goto begin
+}
+
+goto syntax
+
+begin:
+	var maxexp $%magicToTrain.LearningRate
+	math maxexp add 15
+	if %maxexp >= 34 then
+	{
+		var maxexp 34
+	}
+
+	goto Start
 
 snap:
 	var snapCast ON
@@ -23,9 +60,9 @@ maxexp:
 	return
 
 Start:
-	IF_4 then
+	IF_5 then
 	{
-		gosub %4
+		gosub %5
 	}
 	goto Prep
 
@@ -39,7 +76,7 @@ Charge:
 
 
 HoldArmband:
-	put hold %cambItem
+	put remove %cambItem
 	goto Charge
 
 Charge2:
@@ -58,8 +95,8 @@ Wait2:
 
 Prep:
 	pause 0.5
-  matchre Cast.Do You have already fully prepared the Blend spell!
-  matchre Charge With tense movements you|You begin chanting a prayer
+  matchre Cast.Do You have already fully prepared
+  matchre Charge %spellPrep
 	put prep %1 %2
 	matchwait 3
 	goto Prep
@@ -107,6 +144,16 @@ ManaCheck:
 		waiteval $mana >= 40
 	}
 	goto Prep
+
+syntax:
+	echo
+	echo
+	echo *************************************
+	echo *** Not enough arguments provided ***
+	echo *************************************
+	echo
+	echo
+	goto end
 
 End:
 	pause

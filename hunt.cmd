@@ -3,7 +3,7 @@
 #  Requires Outlander 0.10.11 or higher
 #
 
-# debuglevel 5
+#debuglevel 5
 
 #
 #  User defined variables
@@ -20,9 +20,11 @@ var fatigue_berserk avalanche
 var bard_scream havoc
 var sling_ammo shard
 var crossbow_ammo quadrello
+var slingbow_ammo shard
 var repating_crossbow_ammo_count 4
 var bow_ammo arrow
 var brawling_moves elbow|jab|kick|punch
+var diety Eluned
 
 
 #
@@ -49,8 +51,14 @@ var arrange_action arrange
 var tm_mode NO
 var tm_spell
 var tm_mana
-var brawl NO
 var invoke_weapon NO
+var brawl NO
+var current_brawl_move 0
+var should_pray NO
+var last_prayer_timestamp 0
+var drop_skins NO
+
+# eval brawl_moves_count countsplit(%brawling_moves, "|")
 
 #
 #  Critter variables
@@ -167,6 +175,10 @@ scream:
   var use_screams YES
   return
 
+pray:
+  var should_pray YES
+  return
+
 arrange:
   if matchre("%2", "^\d+$") then {
     var arrange %2
@@ -188,6 +200,15 @@ tm:
   var tm_spell %1
   shift
   var tm_mana %1
+  return
+
+boxes:
+  var should_loot_boxes YES
+
+  echo
+  echo *** Looting Boxes ***
+  echo
+
   return
 
 wield:
@@ -232,6 +253,8 @@ appraise_weapon:
   waitfor Roundtime
   pause 0.5
 
+  if matchre("$righthand", "slingbow") then var ranged_ammo %slingbow_ammo
+
   display_weapon:
     action (skill) off
 
@@ -244,7 +267,7 @@ appraise_weapon:
   return
 
 remove_weapon:
-  send hold %weapon
+  send remove my %weapon
   var sheath_style wear
   goto appraise_weapon
 
@@ -284,6 +307,7 @@ attack:
   pause 0.5
 
   if %guild = Bard && %use_screams = YES then gosub bard
+  if %guild = Cleric && %should_pray = YES then gosub cleric
 
   if $hidden = 0 && %should_stealth = YES then gosub stealth
 
@@ -318,6 +342,7 @@ ranged_combat:
   pause 0.5
 
   if %guild = Bard && %use_screams = YES then gosub bard
+  if %guild = Cleric && %should_pray = YES then gosub cleric
   if %guild = Ranger && %skill = Bow then var ranged_action arrows
 
   gosub load
@@ -514,13 +539,13 @@ tm_combat:
 
 tm_wait:
   put release spell
-  pause 2
+  pause 5
   goto tm_combat
 
 tm_prep:
   match RETURN You begin to weave
   match tm_wait nothing else to face
-  matchre tm_quick_cast But you're already preparing a spell!|You are already preparing
+  matchre tm_quick_cast But you're already preparing a spell|You are already preparing
   put target %tm_spell %tm_mana
   matchwait 2
   goto tm_prep
@@ -555,12 +580,18 @@ brawling_combat:
 
   if $hidden = 0 && %should_stealth = YES then gosub stealth
 
-  matchre check_loot Roundtime
+  matchre brawling_next_move Roundtime
   matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
   matchwait 10
   goto brawling_combat
+
+brawling_next_move:
+
+  gosub check_loot
+  goto brawling_combat
+
 
 check_exp:
   if %check_exp = YES {
@@ -595,9 +626,11 @@ show_stats:
 skin:
   gosub do_arrange
   send skin
-  pause 2
+  pause 1.5
   # if $righthand != %weapon then send empty right
   # if $lefthand != %weapon then send empty left
+
+  if $righthand != Empty && $lefthand != Empty then gosub bundle
   return
 
 do_arrange:
@@ -621,8 +654,13 @@ handle_loot:
   if %should_loot_coins = YES then {
     gosub loot_coins
   }
+
   if %should_loot_gems = YES then {
     gosub loot_gems
+  }
+
+  if %should_loot_boxes = YES then {
+    gosub loot_boxes
   }
   return
 
@@ -639,6 +677,17 @@ loot_gems:
   send stow gem
   matchwait 3
   goto loot_gems
+
+loot_boxes:
+  matchre loot_boxes You put
+  matchre RETURN I could not find|What were you referring|Stow what
+  send stow box
+  matchwait 3
+  goto loot_boxes
+
+toggle_loot_boxes_off:
+  var should_loot_boxes NO
+  return
 
 RETURN:
   return
@@ -657,11 +706,55 @@ toggle.scream:
   var use_screams NO
   return
 
+cleric:
+  put pray %diety
+  pause 0.5
+  return
+
 health:
   if $health <= %health_threshold {
     gosub clear
     goto abort
   }
+  return
+
+bundle:
+
+  debug 5
+
+  if "%drop_skins" == "YES" then
+  {
+    goto dropSkin
+  }
+
+  gosub sheath_weapon
+
+  put get my bundling rope
+  match bundle2 You get
+  match noRope What were you referring
+  matchwait 2
+
+bundle2:
+  put bundle
+
+  put tie my bundle
+  put tie my bundle
+  waitfor you tie
+
+  put adjust my bundle
+  put wear my bundle
+  waitfor You sling
+
+  gosub wield
+  return
+
+noRope:
+  var drop_skins YES
+  return
+
+dropSkin:
+  if contains($righthand, %weapon) then put empty left
+  if contains($lefthand, %weapon) then put empty right
   return
 
 fatigue:

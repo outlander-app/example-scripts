@@ -7,7 +7,7 @@ put stop play
 
 get:
   pause 0.5
-  put hold my %instrument
+  put remove my %instrument
   waitforre You slide|You aren't wearing that
   goto get.cloth
 

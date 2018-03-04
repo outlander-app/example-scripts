@@ -1,3 +1,5 @@
+var maxexp 34
+var skill Performance
 
 play:
 	put play $play.song $play.style
@@ -8,6 +10,11 @@ play:
 
 finished:
 	waitfor You finish playing
-	goto play
+	goto checkEXP
+
+checkEXP:
+  pause 0.2
+  if $%skill.LearningRate >= %maxexp then goto END
+  goto play
 
 end:

@@ -85,7 +85,7 @@ FirstCut:
 	goto Matches
 
 Matches:
-	match %s ...wait
+	matchre %s ...wait|Sorry
 	match Get.Awl needs holes punched
 	match Get.Yard dimensions appear to have shifted and could benefit from some remeasuring.
 	match Get.Pins could use some pins to
@@ -149,7 +149,7 @@ Cut:
 Rub:
 	save Rub
   pause 0.5
-	put rub %item with my slickstone
+	put rub my %item with my slickstone
 	goto Matches
 
 Mark:

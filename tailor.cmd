@@ -9,7 +9,7 @@ var current_count 0
 var primary.container $lw.container
 var sewspeed sew
 
-if_2 then 
+if_2 then
 {
   var count %2
 }
@@ -47,7 +47,6 @@ knap:
 haver:
   var itemDesc a cloth haversack
   gosub book 3
-  var sewspeed sewfast
   goto %sewspeed
 
 #0-50

@@ -15,7 +15,7 @@ start:
 
 	if ("%wait_mana" = "OFF") then
 	{
-		waitforre You begin to weave mana lines into a target pattern|You begin chanting a prayer|With tense movements you prepare|You begin to target
+		waitforre You begin to weave mana lines into a target pattern|You begin chanting|With tense movements you prepare|You begin to target
 	}
 
 Weave:

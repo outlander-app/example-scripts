@@ -1,19 +1,21 @@
 debuglevel 5
 
 var primary.container $primary.container
-var compendium tome
+var compendium $compendium
+var anatomy.start $anatomy.start
+var anatomy.stop $anatomy.stop
 
 put get my %compendium
-put turn my %compendium to Elothean
+put turn my %compendium to %anatomy.start
+gosub Crystal
 
 STUDY:
   pause 1
   put play $play.song $play.style
   put study my %compendium
   matchre TURN In a sudden moment of clarity|With a sudden moment of clarity|difficult time comprehending the advanced text
-  match CheckEXP You begin to study
+  matchre CheckEXP You begin to study|You continue studying
   match CheckEXP You begin studying
-  match CheckEXP You continue
   match END Why do you need to study
   matchwait 3
   goto STUDY
@@ -29,11 +31,17 @@ TURN:
 
 CheckEXP:
   pause 1
+  gosub Crystal
   if ($First_Aid.LearningRate >= 34) then goto END
   goto STUDY
 
+Crystal:
+  if $concentration >= 100 then send gaze crystal
+  return
+
 END:
   pause 1
+  gosub Crystal
   put put my %compendium in my %primary.container
   put #echo >Log #ffff00 Anatomy study completed.
   pause 0.5

@@ -1,5 +1,12 @@
+#debug 5
+
 var maxexp 34
 var item %1
+var skill Outdoorsmanship
+
+if_3 then {
+  var skill Perception
+}
 
 Collect:
   match Kick You manage to collect
@@ -30,7 +37,7 @@ Kick:
 
 CheckEXP:
   pause 0.2
-  if $Perception.LearningRate >= %maxexp then goto END
+  if $%skill.LearningRate >= %maxexp then goto END
   goto Collect
 
 END:

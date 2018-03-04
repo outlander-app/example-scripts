@@ -21,22 +21,23 @@ put exp survival 0
 waitfor Overall state of mind
 if ($Locksmithing.Ranks >= 15) then
 {
-	action (disarm) var mode quick when An aged grandmother could|is a laughable matter|is a trivially constructed
-	action (disarm) var mode normal when should not take long with your skills|is precisely at your skill level|will be a simple matter for you to
-	action (disarm) var mode careful when with only minor troubles|got a good shot at|some chance of being able|with persistence you believe you could|would be a longshot|minimal chance|You really don't have any chance|Prayer would be a good start
-	action (disarm) var mode toss when You could just jump off a cliff|same shot as a snowball|pitiful snowball encased in the Flames
+  action (disarm) var mode quick when An aged grandmother could|is a laughable matter|is a trivially constructed
+  action (disarm) var mode normal when should not take long with your skills|is precisely at your skill level|will be a simple matter for you to
+  action (disarm) var mode careful when with only minor troubles|got a good shot at|some chance of being able|with persistence you believe you could|would be a longshot|minimal chance|You really don't have any chance|Prayer would be a good start
+  action (disarm) var mode toss when You could just jump off a cliff|same shot as a snowball|pitiful snowball encased in the Flames
 
   action (picklock) var mode blind when is a laughable matter|The lock is a trivially constructed piece of junk barely worth your time|An aged grandmother could
   action (picklock) var mode quick when will be a simple matter for you to
   action (picklock) var mode normal when should not take long with your skills|is precisely at your skill level|with only minor troubles
   action (picklock) var mode careful when got a good shot at|some chance of being able|with persistence you believe you could|would be a longshot|minimal chance|You really don't have any chance|Prayer would be a good start
   action (picklock) var mode toss when You could just jump off a cliff|same shot as a snowball|pitiful snowball encased in the Flames
-	var mode
+  var mode
   action (disarm) on
   action (picklock) off
-} else
+}
+else
 {
-	var mode careful
+  var mode careful
 }
 
 ## Scripts variables
@@ -55,81 +56,81 @@ var use_lockpick_ring NO
 check_ring:
   action (ring) var use_lockpick_ring YES when (lockpick ring)
   put inv;enc
-	waitfor Encumbrance
-	action (ring) off
+  waitfor Encumbrance
+  action (ring) off
 
 top:
 
   checkArgs:
-  	if_1 then
-  	{
-  		gosub %1
+    if_1 then
+    {
+      gosub %1
       shift
       goto checkArgs
-  	}
+    }
 
-	if $hidden = 1 then put shiver
-	if ("%box_popping" = "ON") then goto guild_Check
-	var LAST top
-		matchre stowStuff right|left
-		match guild_Check empty hands.
-	put glance
-	matchwait
+  if $hidden = 1 then put shiver
+  if ("%box_popping" = "ON") then goto guild_Check
+  var LAST top
+    matchre stowStuff right|left
+    match guild_Check empty hands.
+  put glance
+  matchwait
 
 stowStuff:
-	var LAST stowStuff
-		matchre guild_Check You|Stow
-	put stow right;stow left
-	matchwait
+  var LAST stowStuff
+    matchre guild_Check You|Stow
+  put stow right;stow left
+  matchwait
 
 guild_Check:
-		match barb Barbarian
-		match bard Bard
-		match cleric Cleric
-		match moonmage Moon Mage
-		match ranger Ranger
-		match thief Thief
-		match warmage Warrior Mage
-		match guild_check2 Gender
-	put info
-	matchwait
+    match barb Barbarian
+    match bard Bard
+    match cleric Cleric
+    match moonmage Moon Mage
+    match ranger Ranger
+    match thief Thief
+    match warmage Warrior Mage
+    match guild_check2 Gender
+  put info
+  matchwait
 
 barb:
-	var dismantle bash
-	goto guild_check2
+  var dismantle bash
+  goto guild_check2
 
 bard:
-	var dismantle shriek
-	goto guild_check2
+  var dismantle shriek
+  goto guild_check2
 
 cleric:
-	var dismantle pray
-	goto guild_check2
+  var dismantle pray
+  goto guild_check2
 
 moonmage:
-	var dismantle focus
-	goto guild_check2
+  var dismantle focus
+  goto guild_check2
 
 ranger:
-	var dismantle whistle
-	goto guild_check2
+  var dismantle whistle
+  goto guild_check2
 
 thief:
-	if (toupper("%thief_hide") = "NO") then
-	{
-		var dismantle thump
-	}
-	goto guild_check2
+  if (toupper("%thief_hide") = "NO") then
+  {
+    var dismantle thump
+  }
+  goto guild_check2
 
 warmage:
-	var dismantle fire
-	goto guild_check2
+  var dismantle fire
+  goto guild_check2
 
 popping:
-	var box_popping ON
-	var harvest NO
+  var box_popping ON
+  var harvest NO
   var check_for_boxes NO
-	return
+  return
 
 
 guild_check2:
@@ -140,138 +141,138 @@ guild_check2:
     send khri start secure
     waitforre Roundtime|already using|You have not recovered|You strain
   }
-	gosub ARMOR.CHECK
-	goto main
+  gosub ARMOR.CHECK
+  goto main
 
 
 no_More_Stowing:
-	echo **   No more room for stowing; exiting script   **
-	put wear %armor
-	goto done
+  echo **   No more room for stowing; exiting script   **
+  put wear %armor
+  goto done
 
 main:
-	if ("%box_popping" != "ON") then gosub container_Check1
-	disarm_sub:
+  if ("%box_popping" != "ON") then gosub container_Check1
+  disarm_sub:
     if ("$lefthand" = "Empty") then
     {
       put swap
       pause 1
     }
-		gosub disarm_ID
-		if ("%mode" = "toss") then goto toss_box
-		gosub disarm
-		if "%harvest" = "YES" then gosub analyze
-		if "%multi_trap" = "ON" then goto disarm_sub
-	if %use_lockpick_ring = NO then gosub get_Pick
-	lock_sub:
-		gosub pick_ID
-		if ("%mode" = "toss") then goto toss_box
-		gosub pick
-		if "%multi_lock" = "ON" then goto lock_sub
-		gosub put_Away_Pick
-	if "%box_popping" != "ON" then
-	{
-		gosub loot
-		gosub dismantle
-	}
-	if "%harvest" = "YES" then gosub fix_Lock
-	if "%box_popping" != "ON" then
-	{
-		gosub exp_Check
-		goto main
-	}
-	else goto done
+    gosub disarm_ID
+    if ("%mode" = "toss") then goto toss_box
+    gosub disarm
+    if "%harvest" = "YES" then gosub analyze
+    if "%multi_trap" = "ON" then goto disarm_sub
+  if %use_lockpick_ring = NO then gosub get_Pick
+  lock_sub:
+    gosub pick_ID
+    if ("%mode" = "toss") then goto toss_box
+    gosub pick
+    if "%multi_lock" = "ON" then goto lock_sub
+    gosub put_Away_Pick
+  if "%box_popping" != "ON" then
+  {
+    gosub loot
+    gosub dismantle
+  }
+  if "%harvest" = "YES" then gosub fix_Lock
+  if "%box_popping" != "ON" then
+  {
+    gosub exp_Check
+    goto main
+  }
+  else goto done
 
 container_Check1:
-	var containerToUse %container1
-	pause 1
-		matchre get_For_Disarm (coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|coffin|\bbox\b)
-		match container_Check2 Encumbrance
-	put rummage /b my %container1;enc
-	matchwait
+  var containerToUse %container1
+  pause 1
+    matchre get_For_Disarm (coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|coffin|\bbox\b)
+    match container_Check2 Encumbrance
+  put rummage /b my %container1;enc
+  matchwait
 
 container_Check2:
-	var containerToUse %container2
-	pause 1
-		matchre get_For_Disarm (coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|coffin|\bbox\b)
-		match done Encumbrance
-	put rummage /b my %container2;enc
-	matchwait
+  var containerToUse %container2
+  pause 1
+    matchre get_For_Disarm (coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|coffin|\bbox\b)
+    match done Encumbrance
+  put rummage /b my %container2;enc
+  matchwait
 
 get_For_Disarm:
-	var disarmit $1
-	get_Box:
-		var LAST get_Box
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre RETURN You get|You are already
-		put get my %disarmit in my %containerToUse
-		matchwait
+  var disarmit $1
+  get_Box:
+    var LAST get_Box
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre RETURN You get|You are already
+    put get my %disarmit in my %containerToUse
+    matchwait
 
 toss_Box:
-	var LAST toss_Box
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match You
-	put drop my %disarmit
-	matchwait
+  var LAST toss_Box
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match You
+  put drop my %disarmit
+  matchwait
 
 weapon:
-	var LAST weapon
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match stow_Weapon You
+  var LAST weapon
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match stow_Weapon You
     put remove knuckles
-	matchwait
-	stow_Weapon:
-	var LAST stow_Weapon
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match RETURN You
-	put stow knuckles
-	matchwait
+  matchwait
+  stow_Weapon:
+  var LAST stow_Weapon
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match RETURN You
+  put stow knuckles
+  matchwait
 
 disarm_ID:
   action (disarm) on
   action (picklock) off
 
-	var LAST disarm_ID
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match weapon knuckles
-		match disarm_ID fails to reveal to you
-		matchre return You guess it is already disarmed|Surely any fool|Even your memory can not be that short|Roundtime|Somebody has already located
-		#matchre return coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|box
-	put disarm ID
-	matchwait
+  var LAST disarm_ID
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match weapon knuckles
+    match disarm_ID fails to reveal to you
+    matchre return You guess it is already disarmed|Surely any fool|Even your memory can not be that short|Roundtime|Somebody has already located
+    #matchre return coffer|trunk|chest|strongbox|skippet|caddy|crate|casket|box
+  put disarm ID
+  matchwait
 
 disarm:
-	var multi_trap OFF
+  var multi_trap OFF
 disarmIt_Cont:
-	var LAST disarmIt_Cont
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre return You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help
-		matchre disarmIt_Cont fumbling fails to disarm|This is not likely to be a good thing|unable to make any progress
-	put disarm my %disarmit %mode
-	matchwait
+  var LAST disarmIt_Cont
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre return You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help
+    matchre disarmIt_Cont fumbling fails to disarm|This is not likely to be a good thing|unable to make any progress
+  put disarm my %disarmit %mode
+  matchwait
 
 analyze:
-	var LAST analyze
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match analyze You are unable to
-		matchre harvest You already have made an extensive study|You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help|You've already analyzed
-		matchre return fumbling fails to disarm|This is not likely to be a good thing
-	put disarm ana
-	matchwait
+  var LAST analyze
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match analyze You are unable to
+    matchre harvest You already have made an extensive study|You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help|You've already analyzed
+    matchre return fumbling fails to disarm|This is not likely to be a good thing
+  put disarm ana
+  matchwait
 
 harvest:
-	var LAST harvest
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre return It appears that none of the trap components are accessible|The mangled remnants|The remnants
-		matchre harvest Your laborious fumbling fails to harvest the trap component|You fumble
-		match stow_Component Roundtime
-	put disarm harvest
-	matchwait
+  var LAST harvest
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre return It appears that none of the trap components are accessible|The mangled remnants|The remnants
+    matchre harvest Your laborious fumbling fails to harvest the trap component|You fumble
+    match stow_Component Roundtime
+  put disarm harvest
+  matchwait
 
 stow_Component:
-	#if (matchre ("$righthand", "(%component_list)")) then gosub stow_It $0
-	if ("$righthand" != "Empty") then
-	{
+  #if (matchre ("$righthand", "(%component_list)")) then gosub stow_It $0
+  if ("$righthand" != "Empty") then
+  {
     if (matchre("$roomobjs", "(disposal|waste) bin")) then
     {
       gosub bin
@@ -282,8 +283,8 @@ stow_Component:
     }
 
     gosub empty_hand right
-	}
-	return
+  }
+  return
 
 bin:
   matchre return You drop
@@ -298,48 +299,48 @@ bucket:
   goto bucket
 
 empty_hand:
-	var hand $0
-	empty_hand.d:
-		pause
+  var hand $0
+  empty_hand.d:
+    pause
     if ("$%handhand" = "Empty") then return
-		matchre return You drop|already empty
-		matchre empty_hand.d ...wait
-		put empty %hand hand
-		matchwait 2
-		goto empty_hand.d
+    matchre return You drop|already empty
+    matchre empty_hand.d ...wait
+    put empty %hand hand
+    matchwait 2
+    goto empty_hand.d
 
 stow_It:
-	var component $0
-	stow_Comp:
-		var LAST stow_Comp
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			match return You
-		put put %component in my %componentcontainer
-		matchwait
+  var component $0
+  stow_Comp:
+    var LAST stow_Comp
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      match return You
+    put put %component in my %componentcontainer
+    matchwait
 
 get_Pick:
-	var LAST get_Pick
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre return You get|You are already
-		match no_More_Picks What were you referring to
-	put get my lockpick
-	matchwait 30
+  var LAST get_Pick
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre return You get|You are already
+    match no_More_Picks What were you referring to
+  put get my lockpick
+  matchwait 30
 
 no_More_Picks:
-	echo
-	echo ***  You have no more lockpicks  ***
-	echo
-	put stow $lefthand
-	put stow $righthand
-	goto done
+  echo
+  echo ***  You have no more lockpicks  ***
+  echo
+  put stow $lefthand
+  put stow $righthand
+  goto done
 
 put_Away_Pick:
-	var LAST put_Away_Pick
-	if ("$righthand" = "Empty") then return
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre return You put|What were you
-	put stow lockpick
-	matchwait
+  var LAST put_Away_Pick
+  if ("$righthand" = "Empty") then return
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre return You put|What were you
+  put stow lockpick
+  matchwait
 
 pick_ID:
   if "%box_popping" = "OFF" then
@@ -348,127 +349,127 @@ pick_ID:
     action (picklock) on
   }
 
-	if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
-	var LAST pick_ID
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre disarm_ERROR is not fully disarmed
-		matchre pick_ID fails to teach you anything about the lock guarding it|just broke
-		matchre return Somebody has already|not even locked|Roundtime
-	put pick ID
-	matchwait
+  if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
+  var LAST pick_ID
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre disarm_ERROR is not fully disarmed
+    matchre pick_ID fails to teach you anything about the lock guarding it|just broke
+    matchre return Somebody has already|not even locked|Roundtime
+  put pick ID
+  matchwait
 
 pick:
-	var LAST pick
-	var multi_lock OFF
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+  var LAST pick
+  var multi_lock OFF
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
     matchre pick You are unable to determine
-		matchre pick_Cont Roundtime|has already helpfully been analyzed
-	put pick anal
-	matchwait
+    matchre pick_Cont Roundtime|has already helpfully been analyzed
+  put pick anal
+  matchwait
 pick_Cont:
-	if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
-	var LAST pick_Cont
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match pick_cont You are unable to make
-		matchre return With a soft click|not even locked|Roundtime
-	put pick %mode
-	matchwait
+  if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
+  var LAST pick_Cont
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match pick_cont You are unable to make
+    matchre return With a soft click|not even locked|Roundtime
+  put pick %mode
+  matchwait
 
 loot:
-	open_Box:
-		var LAST open_Box
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			match get_Gem_Pouch open
-		put open my %disarmit
-		matchwait
-	get_Gem_Pouch:
-		var LAST get_Gem_Pouch
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			match fill_Gem_Pouch You get
-		put get my %gempouch
-		matchwait
-	fill_Gem_Pouch:
-		var LAST fill_Gem_Pouch
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre stow_Pouch You take|any gems|anything else|You fill|quickly fill|too full to fit
-			matchre tie_Pouch too valuable to leave untied
-		put fill my %gempouch with my %disarmit
-		matchwait
-	stow_Pouch:
-		var LAST stow_Pouch
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre get_Coin You|Stow
-		put stow my %gempouch
-		matchwait
-	get_Coin:
-		var LAST get_Coin
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre get_Coin You pick up
-			match get_nugget What were you
-		put get coin from my %disarmit
-		matchwait
-	get_nugget:
-		var LAST get_nugget
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre stow_nugget You pick up|You get
-			match return What were you
-		put get nugget from my %disarmit
-		matchwait
-	stow_nugget:
-		var LAST stow_nugget
-			matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-			matchre get_nugget You put your nugget
-			matchre return What were you|Stow what?
-		put stow nugget
-		matchwait
-	tie_Pouch:
-		put tie my %gempouch
-		pause
-		goto fill_Gem_Pouch
+  open_Box:
+    var LAST open_Box
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      match get_Gem_Pouch open
+    put open my %disarmit
+    matchwait
+  get_Gem_Pouch:
+    var LAST get_Gem_Pouch
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      match fill_Gem_Pouch You get
+    put get my %gempouch
+    matchwait
+  fill_Gem_Pouch:
+    var LAST fill_Gem_Pouch
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre stow_Pouch You take|any gems|anything else|You fill|quickly fill|too full to fit
+      matchre tie_Pouch too valuable to leave untied
+    put fill my %gempouch with my %disarmit
+    matchwait
+  stow_Pouch:
+    var LAST stow_Pouch
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre get_Coin You|Stow
+    put stow my %gempouch
+    matchwait
+  get_Coin:
+    var LAST get_Coin
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre get_Coin You pick up
+      match get_nugget What were you
+    put get coin from my %disarmit
+    matchwait
+  get_nugget:
+    var LAST get_nugget
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre stow_nugget You pick up|You get
+      match return What were you
+    put get nugget from my %disarmit
+    matchwait
+  stow_nugget:
+    var LAST stow_nugget
+      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre get_nugget You put your nugget
+      matchre return What were you|Stow what?
+    put stow nugget
+    matchwait
+  tie_Pouch:
+    put tie my %gempouch
+    pause
+    goto fill_Gem_Pouch
 
 dismantle:
-	var LAST dismantle
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		match return Roundtime
-		match dismantle next 15 seconds.
-	put dismantle my %disarmit %dismantle
-	matchwait
+  var LAST dismantle
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    match return Roundtime
+    match dismantle next 15 seconds.
+  put dismantle my %disarmit %dismantle
+  matchwait
 
 fix_Lock:
-  if ("%guild" != "Thief" || %use_lockpick_ring = YES) then return
-	gosub get_Pick
-	fixing:
-	var LAST fixing
-		matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
-		matchre go_On Roundtime|look like it|You can't figure out how
-	put fix my lock
-	matchwait
-	go_On:
-	gosub put_Away_Pick
-	return
+  if ("%guild" != "Thief" || "%use_lockpick_ring" = "YES") then return
+  gosub get_Pick
+  fixing:
+  var LAST fixing
+    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre go_On Roundtime|look like it|You can't figure out how
+  put fix my lock
+  matchwait
+  go_On:
+  gosub put_Away_Pick
+  return
 
 exp_Check:
-	if $Locksmithing.LearningRate >= 30 then goto done
+  if $Locksmithing.LearningRate >= 30 then goto done
   return
 
 return:
-	return
+  return
 
 waiting:
-	pause
-	goto %LAST
+  pause
+  goto %LAST
 
 disarm_ERROR:
-	echo
-	echo Error while opening box
-	echo Something bad happened
-	echo
-	put #beep
-	put stow right
-	pause 1
-	put stow left
-	pause 1
-	goto done
+  echo
+  echo Error while opening box
+  echo Something bad happened
+  echo
+  put #beep
+  put stow right
+  pause 1
+  put stow left
+  pause 1
+  goto done
 
 BOX.CHECK:
     var containerToUse %container1
@@ -493,7 +494,7 @@ ARMOR.CHECK:
      var total.armor 0
 ARMOR.CHECK.1:
      pause .1
-     matchre REMOVE.AND.STOW.1 (hand claw|knuckles|cuirass|gloves|mitts|gauntlets|handguards|thorakes|jerkin|collar|balaclava|longcoat|sleeves|sallet|aventail|greaves|vambraces|shield|buckler|\btarge\b|coif|cowl|gauntlet|half plate|lorica|breastplate|field plate|tasset|ring mail|chain mail|\bmask\b|\bhelm\b|shirt|coat|hood|pants|handwraps|ring robe)
+     matchre REMOVE.AND.STOW.1 (hand claw|knuckles|cuirass|gloves|mitts|gauntlets|handguards|thorakes|jerkin|collar|balaclava|longcoat|sleeves|sallet|aventail|greaves|vambraces|shield|buckler|\btarge\b|coif|cowl|gauntlet|half plate|lorica|breastplate|field plate|tasset|ring mail|chain mail|\bmask\b|\bhelm\b|shirt|workcoat|coat|hood|pants|handwraps|ring robe)
      matchre ARMOR.COMPLETE You have nothing of that sort|You are wearing nothing of that sort|You aren't wearing anything like that|INVENTORY HELP
      send inv combat
      matchwait 5
@@ -641,7 +642,7 @@ WEAR.ARMOR:
 STOWING:
      var location STOWING
      if "$righthandnoun" = "rope" then send coil my rope
-     if "$righthand" = "bundle" || "$lefthand" = "bundle" then put -wear bund;-drop bun
+     if "$righthand" = "bundle" || "$lefthand" = "bundle" then put wear bund;drop bun
      if matchre("$righthandnoun","(crossbow|bow|short bow)") then gosub unload
      if matchre("$righthand","(partisan|shield|buckler|crossbow|lumpy bundle|halberd|staff|longbow|khuj)") then gosub wear my $1
      if matchre("$lefthand","(partisan|shield|buckler|crossbow|lumpy bundle|halberd|staff|longbow|khuj)") then gosub wear my $1
@@ -651,11 +652,11 @@ STOWING:
      return
 
 done:
-	pause 1
-	if "%box_popping" != "ON" then
-	{
-		gosub WEAR.ARMOR
-	}
   pause 1
-	send #parse DISARM DONE
+  if "%box_popping" != "ON" then
+  {
+    gosub WEAR.ARMOR
+  }
+  pause 1
+  send #parse DISARM DONE
 exit

@@ -2,17 +2,24 @@
 # Requires Outlander 0.10.11 or higher
 #
 
-debug 5
+# debug 5
 
-put #class -app +combat
+put #class -app -analyze +combat
 
 var weapons Targeted_Magic|Bow|Large_Edged|Small_Edged
 var options tm ec 17 blade|snipe longbow|"hara.axe"|ambush blade
 var stance ps|ss|ss|ps
 
-#var weapons Bow|Large_Edged|Small_Edged
-#var options snipe longbow|"hara.axe"|ambush blade
-#var stance ss|ss|ps
+if_1 then
+{
+  var weapons Bow|Large_Edged|Small_Edged
+  var options snipe longbow|"hara.axe"|ambush blade
+  var stance ss|ss|ps
+}
+
+#var weapons Twohanded_Blunt|Staves
+#var options maul|nightstick
+#var stance ss|ss
 
 var exp_threshold 5
 var max_exp 32
@@ -83,6 +90,7 @@ Hunt:
   echo
   put atk exp %exp_threshold %opts
   waitforre ^HUNT DONE
+  send ss
   return
 
 
@@ -90,11 +98,15 @@ End:
 
   send ss
 
-  put #class app on
-  put #class combat off
+  put #class +app +analyze -combat
+
   put #beep
   put #parse COMBAT DONE
 
   if $zoneid = 69 {
     put #goto 5
+  }
+
+  if $zoneid = 4 {
+    put #goto 411
   }

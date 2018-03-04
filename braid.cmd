@@ -1,6 +1,9 @@
-#braid %item/vines for mech
+# braid %item/vines for mech
 
 #debuglevel 5
+
+var armor gloves
+
 
 var totaltime $time
 var item vine
@@ -13,6 +16,10 @@ math maxexp add 34
 if %maxexp >= 34 then {
   var maxexp 34
 }
+
+put remove my %armor
+put stow my %armor
+waitforre You put|Stow what
 
 getbraided:
   match braid You get
@@ -34,10 +41,9 @@ braidP:
 braid:
  match braidP ...wait
  match braidP Sorry,
- matchre pull nothing more than wasted effort|begin to wonder why you even bother
+ matchre pull nothing more than wasted effort|begin to wonder why you even bother|already as long as you can make it
  match exp lead rope
  match exp bundling rope
- #match pull heavy rope
  matchre exp You begin|You are certain
  match exp for anything yet
  match forage need to have more
@@ -58,7 +64,7 @@ pull:
  match pullP Sorry,
  match braid Roundtime
  match forage ruined pieces
- match braid what you have left
+ matchre braid what you have left|satisfaction for your work so far
  match drop examine your new
  put pull my %item
  matchWAIT 30
@@ -97,4 +103,6 @@ drop.done:
   goto drop
 
 done:
+  put get my %armor
+  put wear my %armor
   send #parse BRAID DONE

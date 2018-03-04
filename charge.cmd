@@ -12,7 +12,7 @@ Charge:
   matchwait
 
 HoldArmband:
-  put hold %cambItem
+  put remove my %cambItem
   goto Charge
 
 Charge2:

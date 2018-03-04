@@ -51,7 +51,7 @@ eluned:
 	put get holy water
 	pause
 	put stow my holy water
-	put stow chalice
+	put put my chalice in my kit
 	waitfor You put
 	goto END
 
