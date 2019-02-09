@@ -225,7 +225,7 @@ swap.tool:
 	  if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
-    matchre RETURN You get|You remove
+    matchre RETURN You get|You remove|You untie
     if "%has_craft_belt" = "YES" then { put untie my %tool from my %belt }
     else { put get my %tool }
     put untie my %tool

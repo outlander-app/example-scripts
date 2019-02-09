@@ -1,9 +1,9 @@
 #
-#  hunt.cmd - version 0.5
-#  Requires Outlander 0.10.11 or higher
+#  hunt.cmd - version 0.6
+#  Requires Outlander 0.11.17 or higher
 #
 
-#debuglevel 5
+# debuglevel 5
 
 #
 #  User defined variables
@@ -25,6 +25,7 @@ var repating_crossbow_ammo_count 4
 var bow_ammo arrow
 var brawling_moves elbow|jab|kick|punch
 var diety Eluned
+var pray_messaging You offer
 
 
 #
@@ -56,6 +57,9 @@ var brawl NO
 var current_brawl_move 0
 var should_pray NO
 var last_prayer_timestamp 0
+var should_hunt NO
+var hunt_timer 75
+var last_hunt_timestamp 0
 var drop_skins NO
 
 # eval brawl_moves_count countsplit(%brawling_moves, "|")
@@ -177,6 +181,12 @@ scream:
 
 pray:
   var should_pray YES
+  var last_prayer_timestamp 0
+  return
+
+hunt:
+  var should_hunt YES
+  var last_hunt_timestamp 0
   return
 
 arrange:
@@ -234,6 +244,13 @@ no_weapon:
 
 appraise_weapon:
 
+  if matchre("$righthand", "slingbow") then var ranged_ammo %slingbow_ammo
+
+  if %use_offhand = YES {
+    var skill Offhand
+    goto display_weapon
+  }
+
   if %weapon = log {
     var skill Heavy_Thrown
     goto display_weapon
@@ -252,8 +269,6 @@ appraise_weapon:
   send appraise my %weapon quick
   waitfor Roundtime
   pause 0.5
-
-  if matchre("$righthand", "slingbow") then var ranged_ammo %slingbow_ammo
 
   display_weapon:
     action (skill) off
@@ -308,6 +323,7 @@ attack:
 
   if %guild = Bard && %use_screams = YES then gosub bard
   if %guild = Cleric && %should_pray = YES then gosub cleric
+  if %should_hunt = YES then gosub do_hunt
 
   if $hidden = 0 && %should_stealth = YES then gosub stealth
 
@@ -630,7 +646,11 @@ skin:
   # if $righthand != %weapon then send empty right
   # if $lefthand != %weapon then send empty left
 
-  if $righthand != Empty && $lefthand != Empty then gosub bundle
+  if $righthand != Empty && $lefthand != Empty then
+  {
+    debug 5
+    gosub bundle
+  }
   return
 
 do_arrange:
@@ -707,8 +727,21 @@ toggle.scream:
   return
 
 cleric:
+  if $Theurgy.LearningRate >= 34 then return
   put pray %diety
-  pause 0.5
+  waitfor %pray_messaging
+  return
+
+do_hunt:
+  if %last_hunt_timestamp < $gametime
+  {
+    put hunt
+    pause 2
+
+    var temp $gametime
+    math temp add %hunt_timer
+    var last_hunt_timestamp %temp
+  }
   return
 
 health:
@@ -808,7 +841,7 @@ sheath_weapon:
   pause 0.5
 
   matchre wear_weapon where\?
-  matchre return ^You sheath|^You sling|^You attach|^You strap|^With a flick of your wrist|^You hang|you sheath|^Sheathe what\?|^You easily strap|^With fluid and stealthy movements|^You slip|^You secure
+  matchre return ^You sheath|^You sling|^You attach|^You strap|^With a flick of your wrist|^You hang|you sheath|^Sheathe what\?|^You easily strap|^With fluid and stealthy movements|^You slip|^You secure|^Sheathing
   send %sheath_style my %weapon
   matchwait
 

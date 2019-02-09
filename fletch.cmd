@@ -27,6 +27,11 @@ longbow:
   gosub book 3
   goto %shapeaction
 
+battlelongbow:
+  var itemDesc a battle longbow
+  gosub book 3
+  goto %shapeaction
+
 battlebow:
   var itemDesc a battle bow
   var item bow

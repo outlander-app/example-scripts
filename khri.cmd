@@ -50,5 +50,6 @@ done:
   pause
   send khri stop
   send stop play
+  wait
   send stand
   put #parse KHRI DONE

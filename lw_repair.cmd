@@ -4,6 +4,10 @@ var container backpack
 var belt outfitter's belt
 var has_craft_belt $has_tailor_craft_belt
 
+var command
+
+if_2 then goto %2
+
 GET:
 	matchre GET.STOW You get|You are already holding that
 	matchre HOLD already in your inventory
@@ -23,6 +27,7 @@ HOLD:
 
 HOLD.WEAR:
 	var inv.action WEAR
+	if $righthand = Empty then put swap
 	goto REPAIR.MAIN
 
 WEAR.ITEM:
@@ -51,13 +56,16 @@ REPAIR:
 	goto Get.Needle
 
 Matches:
+	matchre RETURN not damaged enough to warrant repair|You realize that cannot be repaired|suffered too much damage
+	match RETURN cannot figure out how to do that
 	match %s ...wait
 	match MoreThread The needles need to have thread put on
 	match Get.Needle You rub and press
 	match Get.Slick ready to be rubbed with a slickstone
 	match Sew Stitch after stitch
-	matchre RETURN not damaged enough to warrant repair|You realize that cannot be repaired|suffered too much damage
-	matchwait
+	put %command
+	matchwait 5
+	goto Matches
 
 Get.Needle:
 	pause 1
@@ -71,12 +79,12 @@ Get.Slick:
 
 Sew:
 	save Sew
-	put push my %1 with my sew needle
+	var command push my %1 with my sew needle
 	goto Matches
 
 Rub:
 	save Rub
-	put rub my %1 with my slickstone
+	var command rub my %1 with my slickstone
 	goto Matches
 
 swap.tool:
@@ -86,7 +94,7 @@ swap.tool:
 	  if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
-    matchre RETURN You get|You remove
+    matchre RETURN You get|You remove|You untie
     if "%has_craft_belt" = "YES" then { put untie my %tool from my %belt }
     else { put get my %tool }
     put untie my %tool
@@ -135,5 +143,6 @@ NoThread:
 	echo
 	return
 
+done:
 END:
-put #parse REPAIR DONE
+	put #parse REPAIR DONE

@@ -9,8 +9,6 @@ math maxexp add 12
 if %maxexp >= 34 then {
 	var maxexp 34
 }
-var play YES
-var target %1
 
 goto START
 
@@ -31,11 +29,13 @@ top:
   put stow right
   put stow left
   pause 1
+  matchre climb You get
+  matchre nope What were you referring to
   put get my climbing rope
-  waitfor You get
+  matchwait
 
 climb:
-  put play concerto
+  put play $play.song $play.style
   put climb practice my rope
   waitfor You finish practicing your climbing skill
   goto checkEXP
@@ -45,5 +45,12 @@ checkEXP:
   if $Athletics.LearningRate >= %maxexp then goto end
   goto climb
 
+nope:
+  echo
+  echo *** cannot find rope "(╯°□°)╯︵ ┻━┻" ***
+  echo
+  goto end
+
 end:
   put put my rope in my %container
+	put #parse CLIMB DONE

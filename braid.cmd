@@ -5,7 +5,6 @@
 var armor gloves
 
 
-var totaltime $time
 var item vine
 if_1 var item %1
 

@@ -1,8 +1,8 @@
-#debug 5
+debug 5
 
 var item %1
 var container $primary.container
-var belt carpenter's belt 
+var belt carpenter's belt
 var has_craft_belt $has_shaping_craft_belt
 
 var need_string NO
@@ -131,15 +131,14 @@ Bowstring:
 
 swap.tool:
   var tool $0
-  if !contains("$lefthand" != "%tool") then
+  if !contains("$lefthand", "%tool") then
   {
-    if ("$lefthand" != "Empty") then gosub stow.tool
+    if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
     matchre RETURN You get|You remove
-    #if "%has_craft_belt" = "YES" then put untie my %tool
-    #else put get my %tool
-    put untie my %tool from my %belt
+    if "%has_craft_belt" = "YES" then { put untie my %tool from %belt }
+    else { put untie my %tool }
     put get my %tool in my %container
     matchwait 5
     goto done

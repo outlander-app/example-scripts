@@ -21,6 +21,7 @@ put exp survival 0
 waitfor Overall state of mind
 if ($Locksmithing.Ranks >= 15) then
 {
+  action (disarm) var mode careful when not likely to be a good thing
   action (disarm) var mode quick when An aged grandmother could|is a laughable matter|is a trivially constructed
   action (disarm) var mode normal when should not take long with your skills|is precisely at your skill level|will be a simple matter for you to
   action (disarm) var mode careful when with only minor troubles|got a good shot at|some chance of being able|with persistence you believe you could|would be a longshot|minimal chance|You really don't have any chance|Prayer would be a good start
@@ -183,6 +184,10 @@ main:
   }
   else goto done
 
+rt:
+  pause
+  goto %LAST
+
 container_Check1:
   var containerToUse %container1
   pause 1
@@ -200,30 +205,31 @@ container_Check2:
   matchwait
 
 get_For_Disarm:
+  var LAST get_For_Disarm
   var disarmit $1
   get_Box:
     var LAST get_Box
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre RETURN You get|You are already
     put get my %disarmit in my %containerToUse
     matchwait
 
 toss_Box:
   var LAST toss_Box
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match You
   put drop my %disarmit
   matchwait
 
 weapon:
   var LAST weapon
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match stow_Weapon You
     put remove knuckles
   matchwait
   stow_Weapon:
   var LAST stow_Weapon
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match RETURN You
   put stow knuckles
   matchwait
@@ -233,7 +239,7 @@ disarm_ID:
   action (picklock) off
 
   var LAST disarm_ID
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match weapon knuckles
     match disarm_ID fails to reveal to you
     matchre return You guess it is already disarmed|Surely any fool|Even your memory can not be that short|Roundtime|Somebody has already located
@@ -245,15 +251,20 @@ disarm:
   var multi_trap OFF
 disarmIt_Cont:
   var LAST disarmIt_Cont
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre return You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help
-    matchre disarmIt_Cont fumbling fails to disarm|This is not likely to be a good thing|unable to make any progress
+    matchre setCareful This is not likely to be a good thing
+    matchre disarmIt_Cont fumbling fails to disarm|unable to make any progress
   put disarm my %disarmit %mode
   matchwait
 
+setCareful:
+  var mode careful
+  goto %LAST
+
 analyze:
   var LAST analyze
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match analyze You are unable to
     matchre harvest You already have made an extensive study|You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help|You've already analyzed
     matchre return fumbling fails to disarm|This is not likely to be a good thing
@@ -262,7 +273,7 @@ analyze:
 
 harvest:
   var LAST harvest
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre return It appears that none of the trap components are accessible|The mangled remnants|The remnants
     matchre harvest Your laborious fumbling fails to harvest the trap component|You fumble
     match stow_Component Roundtime
@@ -313,14 +324,14 @@ stow_It:
   var component $0
   stow_Comp:
     var LAST stow_Comp
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       match return You
     put put %component in my %componentcontainer
     matchwait
 
 get_Pick:
   var LAST get_Pick
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre return You get|You are already
     match no_More_Picks What were you referring to
   put get my lockpick
@@ -337,9 +348,9 @@ no_More_Picks:
 put_Away_Pick:
   var LAST put_Away_Pick
   if ("$righthand" = "Empty") then return
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre return You put|What were you
-  put stow lockpick
+  put stow my lockpick
   matchwait
 
 pick_ID:
@@ -351,7 +362,7 @@ pick_ID:
 
   if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
   var LAST pick_ID
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre disarm_ERROR is not fully disarmed
     matchre pick_ID fails to teach you anything about the lock guarding it|just broke
     matchre return Somebody has already|not even locked|Roundtime
@@ -361,7 +372,7 @@ pick_ID:
 pick:
   var LAST pick
   var multi_lock OFF
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre pick You are unable to determine
     matchre pick_Cont Roundtime|has already helpfully been analyzed
   put pick anal
@@ -369,7 +380,7 @@ pick:
 pick_Cont:
   if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
   var LAST pick_Cont
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match pick_cont You are unable to make
     matchre return With a soft click|not even locked|Roundtime
   put pick %mode
@@ -378,49 +389,49 @@ pick_Cont:
 loot:
   open_Box:
     var LAST open_Box
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       match get_Gem_Pouch open
     put open my %disarmit
     matchwait
   get_Gem_Pouch:
     var LAST get_Gem_Pouch
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       match fill_Gem_Pouch You get
     put get my %gempouch
     matchwait
   fill_Gem_Pouch:
     var LAST fill_Gem_Pouch
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre stow_Pouch You take|any gems|anything else|You fill|quickly fill|too full to fit
       matchre tie_Pouch too valuable to leave untied
     put fill my %gempouch with my %disarmit
     matchwait
   stow_Pouch:
     var LAST stow_Pouch
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre get_Coin You|Stow
     put stow my %gempouch
     matchwait
   get_Coin:
     var LAST get_Coin
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre get_Coin You pick up
       match get_nugget What were you
     put get coin from my %disarmit
     matchwait
   get_nugget:
     var LAST get_nugget
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre stow_nugget You pick up|You get
       match return What were you
     put get nugget from my %disarmit
     matchwait
   stow_nugget:
     var LAST stow_nugget
-      matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+      matchre rt ^\.\.\.wait|^Sorry, you may only type
       matchre get_nugget You put your nugget
       matchre return What were you|Stow what?
-    put stow nugget
+    put stow my nugget
     matchwait
   tie_Pouch:
     put tie my %gempouch
@@ -429,7 +440,7 @@ loot:
 
 dismantle:
   var LAST dismantle
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     match return Roundtime
     match dismantle next 15 seconds.
   put dismantle my %disarmit %dismantle
@@ -440,7 +451,7 @@ fix_Lock:
   gosub get_Pick
   fixing:
   var LAST fixing
-    matchre PAUSE ^\.\.\.wait|^Sorry, you may only type
+    matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre go_On Roundtime|look like it|You can't figure out how
   put fix my lock
   matchwait

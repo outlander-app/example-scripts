@@ -5,6 +5,7 @@
 
 var cambItem $camb_item
 var spellPrep With tense movements you|You begin chanting|With rigid movements
+var spellCast gesture
 
 
 ##########################################
@@ -13,6 +14,9 @@ var spellPrep With tense movements you|You begin chanting|With rigid movements
 
 ECHO *******************************
 ECHO **
+ECHO ** Train magic with cambrinth.  Set the global variable "camb_item"
+ECHO **
+ECHO ** #var camb_item ring
 ECHO **
 ECHO ** When starting the script, type .magic <spell> <spell prep amount> <charge cambrinth amount> <skill>
 ECHO **
@@ -28,6 +32,8 @@ ECHO *******************************
 
 var magicToTrain %4
 var snapCast OFF
+var manaCheck 20
+var manaWaitLevel 60
 
 if_5 then
 {
@@ -126,7 +132,7 @@ Cast:
 	}
 	Cast.Do:
 		matchre ManaCheck You strain
-		matchre ExpCheck snap
+		matchre ExpCheck %spellCast
 		put cast
 		matchwait 4
 		goto Cast.Do
@@ -137,11 +143,11 @@ ExpCheck:
 	goto ManaCheck
 
 ManaCheck:
-	if ($mana < 20) then {
+	if ($mana < %manaCheck) then {
 		echo
-		echo Waiting on mana - $mana/40 %
+		echo Waiting on mana - $mana/%manaWaitLevel %
 		echo
-		waiteval $mana >= 40
+		waiteval $mana >= %manaWaitLevel
 	}
 	goto Prep
 
@@ -157,4 +163,5 @@ syntax:
 
 End:
 	pause
+  put wear my %cambItem
 	put #parse MAGIC DONE

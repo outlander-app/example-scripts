@@ -5,7 +5,7 @@ var tool.container $primary.container
 var item %0
 
 GET:
-  matchre GET.SHEATH You (draw|deftly remove)
+  matchre GET.SHEATH You (draw|deftly remove|slip)
   matchre GET.STOW You can only wield a weapon or a shield|need to remove it first|too heavy for you
   matchre GET.TIE You'll have to untie
   put wield my %item
@@ -23,7 +23,7 @@ GET.SHEATH:
 
 GET.STOW:
   var inv.action STOW
-  matchre GET.TIE the ties prevent you|You'll have to untie
+  matchre GET.TIE the ties prevent you|You'll have to untie|You should untie
   matchre GET.WEAR But that is already in your inventory|need to remove it first
   matchre REPAIR.MAIN You get|You are already holding that
   put get my %item
@@ -31,7 +31,7 @@ GET.STOW:
 
 GET.WEAR:
   var inv.action WEAR
-  put hold my %item
+  put remove my %item
   goto REPAIR.MAIN
 
 SHEATH.ITEM:

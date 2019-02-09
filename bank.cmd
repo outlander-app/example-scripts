@@ -50,7 +50,6 @@ shard:
   gosub do_exchange dokora kronar lirum
   gosub teller %coinage
   gosub check_withdraw
-  waitfor The clerk counts out
   move south
   goto end
 

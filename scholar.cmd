@@ -4,6 +4,12 @@ var page 1
 var book $scholar.book
 var play_song YES
 
+var maxexp $Scholarship.LearningRate
+math maxexp add 12
+if %maxexp >= 34 then {
+	var maxexp 34
+}
+
 action var play_song YES when You finish playing
 
 if_1 then goto %1
@@ -67,7 +73,7 @@ Study:
   matchwait
 
 CheckExp:
-  if $Scholarship.LearningRate >= 34 then goto Done
+  if $Scholarship.LearningRate >= %maxexp then goto Done
   goto AddPage
 
 Done:
