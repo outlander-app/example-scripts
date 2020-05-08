@@ -35,7 +35,7 @@ wait:
 stir:
   var last stir
   pause 0.5
-  gosub swap.tool rod
+  gosub swap.tool stirring rod
   put stir crucible with my rod
   goto matches
 
@@ -70,7 +70,7 @@ swap.tool:
     if ("$righthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
-    matchre RETURN You get|You remove|You are already holding
+    matchre RETURN You get|You remove|You are already holding|You untie
     put untie my %tool from my %belt
     put get my %tool in my %primary.container
     matchwait 5
@@ -102,5 +102,5 @@ doneCheck:
   goto done
 
 done:
-  gosub stow.tool rod
+  gosub stow.tool stirring rod
   put #parse SMELT DONE

@@ -1,7 +1,7 @@
 debuglevel 5
 
 var aug focus
-var util EMPTY
+var util hasten
 var play_song YES
 
 action var play_song YES when You finish playing

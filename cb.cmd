@@ -6,9 +6,9 @@
 
 put #class -app -analyze +combat
 
-var weapons Targeted_Magic|Bow|Large_Edged|Small_Edged
-var options tm ec 17 blade|snipe longbow|"hara.axe"|ambush blade
-var stance ps|ss|ss|ps
+var weapons Targeted_Magic|Bow|Brawling|Large_Edged|Small_Edged
+var options tm ec 17 blade|snipe longbow|brawl "hara.axe"|"hara.axe"|ambush blade
+var stance ps|ss|ss|ss|ps
 
 if_1 then
 {

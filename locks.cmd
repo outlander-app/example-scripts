@@ -1,7 +1,7 @@
 debug 5
 
 var bag kit
-var box training box
+var box $training_box
 
 if_1 then goto %1
 
@@ -21,7 +21,7 @@ pick:
   pause 0.5
   matchre checkExp CLICK
   matchre GetLockpick You need some type of tool
-  matchre done The lock feels warm
+  matchre done The lock feels warm|you are not making any progress|The lock looks weak
   put lock my %box
   put pick my %box with my lockpick
   matchwait 5

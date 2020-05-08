@@ -3,7 +3,6 @@
 var kills 0
 var mod
 
-
 watchKills:
   matchre addKill .* has vanquished the .* Get it out of there
   matchwait

@@ -9,89 +9,89 @@ var command
 if_2 then goto %2
 
 GET:
-	matchre GET.STOW You get|You are already holding that
-	matchre HOLD already in your inventory
-	put get my %1
-	matchwait 10
-	goto END
+    matchre GET.STOW You get|You are already holding that
+    matchre HOLD already in your inventory
+    put get my %1
+    matchwait 10
+    goto END
 
 GET.STOW:
-	var inv.action STOW
-	goto REPAIR.MAIN
+    var inv.action STOW
+    goto REPAIR.MAIN
 
 HOLD:
-	matchre HOLD.WEAR You loosen|You work|You pull|You take
-	put hold my %1
-	matchwait 10
-	goto END
+    matchre HOLD.WEAR You loosen|You work|You pull|You take
+    put hold my %1
+    matchwait 10
+    goto END
 
 HOLD.WEAR:
-	var inv.action WEAR
-	if $righthand = Empty then put swap
-	goto REPAIR.MAIN
+    var inv.action WEAR
+    if $righthand = Empty then put swap
+    goto REPAIR.MAIN
 
 WEAR.ITEM:
-	pause 1
-	put wear my %1
-	return
+    pause 1
+    put wear my %1
+    return
 
 STOW.ITEM:
-	pause 1
-	put stow my %1
-	return
+    pause 1
+    put stow my %1
+    return
 
 STOW.TOOLS:
-	pause 0.5
-	gosub stow.tool
-	pause 0.5
-	return
+    pause 0.5
+    gosub stow.tool
+    pause 0.5
+    return
 
 REPAIR.MAIN:
-	gosub REPAIR
-	gosub stow.tool
-	gosub %inv.action.ITEM
-	goto END
+    gosub REPAIR
+    gosub stow.tool
+    gosub %inv.action.ITEM
+    goto END
 
 REPAIR:
-	goto Get.Needle
+    goto Get.Needle
 
 Matches:
-	matchre RETURN not damaged enough to warrant repair|You realize that cannot be repaired|suffered too much damage
-	match RETURN cannot figure out how to do that
-	match %s ...wait
-	match MoreThread The needles need to have thread put on
-	match Get.Needle You rub and press
-	match Get.Slick ready to be rubbed with a slickstone
-	match Sew Stitch after stitch
-	put %command
-	matchwait 5
-	goto Matches
+    matchre done not damaged enough to warrant repair|You realize that cannot be repaired|suffered too much damage
+    match done cannot figure out how to do that
+    match %s ...wait
+    match MoreThread The needles need to have thread put on
+    match Get.Needle You rub and press
+    match Get.Slick ready to be rubbed with a slickstone
+    match Sew Stitch after stitch
+    put %command
+    matchwait 5
+    goto Matches
 
 Get.Needle:
-	pause 1
-	gosub swap.tool needle
-	goto Sew
+    pause 1
+    gosub swap.tool needle
+    goto Sew
 
 Get.Slick:
-	pause 1
-	gosub swap.tool slickstone
-	goto Rub
+    pause 1
+    gosub swap.tool slickstone
+    goto Rub
 
 Sew:
-	save Sew
-	var command push my %1 with my sew needle
-	goto Matches
+    save Sew
+    var command push my %1 with my sew needle
+    goto Matches
 
 Rub:
-	save Rub
-	var command rub my %1 with my slickstone
-	goto Matches
+    save Rub
+    var command rub my %1 with my slickstone
+    goto Matches
 
 swap.tool:
   var tool $0
   if !contains("$lefthand", "%tool") then
   {
-	  if ("$lefthand" != "Empty") then { gosub stow.tool }
+      if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
     matchre RETURN You get|You remove|You untie
@@ -125,24 +125,27 @@ RETURN:
   return
 
 MoreThread:
-	put put my needle in my %container;get thread in my %container
-	match Thread You get
-	match NoThread What were you referring to?
-	matchwait 3
-	goto NoThread
+    put put my needle in my %container;get thread in my %container
+    match Thread You get
+    match NoThread What were you referring to?
+    matchwait 3
+    goto NoThread
 
 Thread:
-	put put my thread on needle in my %container
-	waitfor You carefully thread
-	put get needle in my %container
-	goto Sew
+    put put my thread on needle in my %container
+    waitfor You carefully thread
+    put get needle in my %container
+    goto Sew
 
 NoThread:
-	echo
-	echo ########### NO THREAD ###########
-	echo
-	return
+    echo
+    echo ########### NO THREAD ###########
+    echo
+    return
 
 done:
+    gosub stow.tool
+    gosub %inv.action.ITEM
+
 END:
-	put #parse REPAIR DONE
+    put #parse REPAIR DONE

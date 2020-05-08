@@ -1,9 +1,9 @@
 #
-#  hunt.cmd - version 0.6
-#  Requires Outlander 0.11.17 or higher
+#  hunt.cmd - version 0.7
+#  Requires Outlander 0.11.23 or higher
 #
 
-# debuglevel 5
+#debuglevel 5
 
 #
 #  User defined variables
@@ -19,11 +19,11 @@ var berserk_on_fatigue YES
 var fatigue_berserk avalanche
 var bard_scream havoc
 var sling_ammo shard
-var crossbow_ammo quadrello
+var crossbow_ammo shard
 var slingbow_ammo shard
 var repating_crossbow_ammo_count 4
 var bow_ammo arrow
-var brawling_moves elbow|jab|kick|punch
+var brawling_moves circle|elbow|claw|kick|punch
 var diety Eluned
 var pray_messaging You offer
 
@@ -31,6 +31,8 @@ var pray_messaging You offer
 #
 #  Script Variables
 #
+
+
 var kill_count 0
 var use_offhand NO
 var check_exp NO
@@ -53,16 +55,15 @@ var tm_mode NO
 var tm_spell
 var tm_mana
 var invoke_weapon NO
-var brawl NO
-var current_brawl_move 0
 var should_pray NO
 var last_prayer_timestamp 0
 var should_hunt NO
 var hunt_timer 75
-var last_hunt_timestamp 0
 var drop_skins NO
 
-# eval brawl_moves_count countsplit(%brawling_moves, "|")
+var brawl NO
+var brawling_move_count 0
+eval brawling_moves_max countsplit("%brawling_moves", "|")
 
 #
 #  Critter variables
@@ -93,6 +94,8 @@ else {
   echo  *** You need to provide a weapon to use ***
   echo  *** .hunt spear
   echo  *** .hunt offhand nightstick
+  echo  *** .hunt tm stra 2 sword
+  echo
   echo
   exit
 }
@@ -186,7 +189,6 @@ pray:
 
 hunt:
   var should_hunt YES
-  var last_hunt_timestamp 0
   return
 
 arrange:
@@ -266,6 +268,11 @@ appraise_weapon:
     action (skill) var skill Heavy_Thrown when heavy thrown|heavy blunt|large edged|two-handed
   }
 
+  if %brawl = YES {
+    var skill Brawling
+    goto display_weapon
+  }
+
   send appraise my %weapon quick
   waitfor Roundtime
   pause 0.5
@@ -332,7 +339,7 @@ attack:
   match do_get_thrown What are you trying to throw
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
-  matchwait 10
+  matchwait 3
   goto attack
 
 do_get_thrown:
@@ -544,6 +551,8 @@ tm_combat:
   pause 0.5
 
   if %guild = Bard && %use_screams = YES then gosub bard
+  if %guild = Cleric && %should_pray = YES then gosub cleric
+  if %should_hunt = YES then gosub do_hunt
 
   gosub tm_prep
   gosub tm_aiming
@@ -593,21 +602,33 @@ brawling_combat:
   pause 0.5
 
   if %guild = Bard && %use_screams = YES then gosub bard
+  if %guild = Cleric && %should_pray = YES then gosub cleric
+  if %should_hunt = YES then gosub do_hunt
 
   if $hidden = 0 && %should_stealth = YES then gosub stealth
+
+  gosub brawling_attack
+  gosub check_loot
+
+  goto brawling_combat
+
+brawling_attack:
+  var attack_style %brawling_moves[%brawling_move_count]
 
   matchre brawling_next_move Roundtime
   matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
-  matchwait 10
-  goto brawling_combat
+  matchwait 5
+  goto brawling_attack
+  return
 
 brawling_next_move:
+  math brawling_move_count add 1
 
-  gosub check_loot
-  goto brawling_combat
+  if %brawling_move_count >= %brawling_moves_max then var brawling_move_count 0
 
+  return
 
 check_exp:
   if %check_exp = YES {
@@ -733,14 +754,14 @@ cleric:
   return
 
 do_hunt:
-  if %last_hunt_timestamp < $gametime
+  if $last_hunt_timestamp < $gametime
   {
     put hunt
     pause 2
 
     var temp $gametime
     math temp add %hunt_timer
-    var last_hunt_timestamp %temp
+    put #var last_hunt_timestamp %temp
   }
   return
 

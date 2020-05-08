@@ -16,11 +16,11 @@ start:
 
 
 healWounds:
-  gosub charge hw 5 10 "$0"
+  gosub charge hw 5 12 "$0"
   return
 
 healScars:
-  gosub charge hs 5 10 "$0"
+  gosub charge hs 5 12 "$0"
   return
 
 

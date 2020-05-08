@@ -80,7 +80,7 @@ get.tool:
   var tool $0
   pause 0.5
   matchre %last \.\.\.wait|Sorry
-  matchre RETURN You get|You remove
+  matchre RETURN You get|You remove|You untie
   put untie %tool from my %belt
   put get my %tool in my %container
   matchwait 5

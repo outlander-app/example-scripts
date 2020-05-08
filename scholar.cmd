@@ -7,12 +7,24 @@ var play_song YES
 var maxexp $Scholarship.LearningRate
 math maxexp add 12
 if %maxexp >= 34 then {
-	var maxexp 34
+  var maxexp 34
 }
 
 action var play_song YES when You finish playing
 
-if_1 then goto %1
+goto START
+
+maxexp:
+  var maxexp 34
+  return
+
+START:
+  if_1 then
+  {
+    gosub %1
+    shift
+    goto START
+  }
 
 echo ****************************************
 echo ** For this script to work, you will need a weaponsmithing book and Bones (music instrument)

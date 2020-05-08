@@ -34,6 +34,9 @@ var magicToTrain %4
 var snapCast OFF
 var manaCheck 20
 var manaWaitLevel 60
+var fully_prepared NO
+
+action var fully_prepared YES when You feel fully prepared
 
 if_5 then
 {
@@ -48,120 +51,141 @@ if_4 then
 goto syntax
 
 begin:
-	var maxexp $%magicToTrain.LearningRate
-	math maxexp add 15
-	if %maxexp >= 34 then
-	{
-		var maxexp 34
-	}
+    var maxexp $%magicToTrain.LearningRate
+    math maxexp add 15
+    if %maxexp >= 34 then
+    {
+        var maxexp 34
+    }
 
-	goto Start
+    goto Start
 
 snap:
-	var snapCast ON
-	return
+    var snapCast ON
+    return
 
 maxexp:
-	var maxexp 34
-	return
+    var maxexp 34
+    return
 
 Start:
-	IF_5 then
-	{
-		gosub %5
-	}
-	goto Prep
+    IF_5 then
+    {
+        gosub %5
+    }
+    goto Prep
 
 
 Charge:
-	put charge my %cambItem %3
-	match Charge2 Roundtime
-	match HoldArmband Try though you may
-	match Wait ...
-	matchwait
+    match Charge2 Roundtime
+    match HoldArmband Try though you may
+    match Wait ...
+    match WaitCharge1 You strain, but lack the mental stamina
+    put charge my %cambItem %3
+    matchwait
 
+WaitCharge1:
+    waiteval $mana > 20
+    goto Charge
 
 HoldArmband:
-	put remove %cambItem
-	goto Charge
+    put remove %cambItem
+    goto Charge
 
 Charge2:
-	put charge my %cambItem %3
-	match Focus Roundtime
-	match Wait2 ...
-	matchwait
+    match WaitCharge2 You strain, but lack the mental stamina
+    match Focus Roundtime
+    match Wait2 ...
+    put charge my %cambItem %3
+    matchwait
+
+WaitCharge2:
+    waiteval $mana >= 20
+    goto Charge2
 
 Wait:
-	pause 1
-	goto Charge
+    pause 1
+    goto Charge
 
 Wait2:
-	pause 1
-	goto Charge2
+    pause 1
+    goto Charge2
 
 Prep:
-	pause 0.5
-  matchre Cast.Do You have already fully prepared
-  matchre Charge %spellPrep
-	put prep %1 %2
-	matchwait 3
-	goto Prep
+    pause 0.5
+    matchre Cast.Do You have already fully prepared
+    matchre Charge %spellPrep
+    match StopPlay stop playing
+    put prep %1 %2
+    matchwait 3
+    goto Prep
+
+StopPlay:
+    put stop play
+    goto Prep
 
 Focus:
-	put invoke my %cambItem spell
-	match Concentrate Roundtime
-	match Wait3 ...
-	matchwait
+    put invoke my %cambItem spell
+    match Concentrate Roundtime
+    match Wait3 ...
+    matchwait
 
 Wait3:
-	pause 1
-	goto Focus
+    pause 1
+    goto Focus
 
 Concentrate:
-	put power
-	goto Cast
+    match Cast Roundtime
+    match Cast ...
+    put power
+    matchwait 2
+    goto Cast
 
 Cast:
-	if ("%snapCast" = "OFF") then
-	{
-		waitfor fully prepared
-	}
-	else
-	{
-		pause 7
-	}
-	Cast.Do:
-		matchre ManaCheck You strain
-		matchre ExpCheck %spellCast
-		put cast
-		matchwait 4
-		goto Cast.Do
+    if "%fully_prepared" = "YES" then goto Cast.Do
+
+    if ("%snapCast" = "OFF") then
+    {
+        waitfor fully prepared
+    }
+    else
+    {
+        pause 7
+    }
+    Cast.Do:
+        matchre ManaCheck You strain
+        matchre ExpCheck %spellCast
+        put cast
+        matchwait 2
+        goto Cast.Do
 
 ExpCheck:
-	pause 1
-	if ($%magicToTrain.LearningRate >= %maxexp) then goto END
-	goto ManaCheck
+    var fully_prepared NO
+    pause 1
+    if ($%magicToTrain.LearningRate >= %maxexp) then goto END
+    goto ManaCheck
 
 ManaCheck:
-	if ($mana < %manaCheck) then {
-		echo
-		echo Waiting on mana - $mana/%manaWaitLevel %
-		echo
-		waiteval $mana >= %manaWaitLevel
-	}
-	goto Prep
+    var fully_prepared NO
+    if ($mana < %manaCheck) then {
+        echo
+        echo Waiting on mana - $mana/%manaWaitLevel %
+        echo
+        waiteval $mana >= %manaWaitLevel
+    }
+    goto Prep
 
 syntax:
-	echo
-	echo
-	echo *************************************
-	echo *** Not enough arguments provided ***
-	echo *************************************
-	echo
-	echo
-	goto end
+    echo
+    echo
+    echo *************************************
+    echo *** Not enough arguments provided ***
+    echo *************************************
+    echo
+    echo
+    goto end
 
 End:
-	pause
-  put wear my %cambItem
-	put #parse MAGIC DONE
+    pause
+    put wear my %cambItem
+    put #parse MAGIC DONE

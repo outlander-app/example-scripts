@@ -118,6 +118,20 @@ sbelt:
   var item belt
   goto %sewspeed
 
+fbelt:
+  var itemDesc a cloth survival belt
+  gosub book 3
+  var sewspeed sewfast
+  var item belt
+  goto %sewspeed
+
+fpad:
+  var itemDesc a cloth saddle pad
+  gosub book 3
+  var sewspeed sewfast
+  var item pad
+  goto %sewspeed
+
 book:
   var chapter $1
   put get my tailoring book

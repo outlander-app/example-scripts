@@ -246,6 +246,10 @@ RETURN:
   pause 0.5
   return
 
+NotEnough:
+  echo **** Not enough material  ****
+  goto done
+
 done:
   gosub stow.tool
   put #parse WOODWORK DONE

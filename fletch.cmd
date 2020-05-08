@@ -43,6 +43,11 @@ comb:
   gosub book 7
   goto %shapeaction
 
+haircomb:
+  var itemDesc a wood haircomb
+  gosub book 7
+  goto %shapeaction
+
 basilisk:
   var itemDesc basilisk arrows
   var material shafts
@@ -64,7 +69,8 @@ jaggedhorn:
   var itemDesc jagged-horn arrows
   var item jagged-horn
   var material shafts
-  var item.container quiver
+  var item.container fletching kit
+  var primary.container fletching kit
   var shapeaction arrows
   gosub book 5
   goto get.lumber

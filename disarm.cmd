@@ -138,9 +138,9 @@ guild_check2:
   if "%check_for_boxes" = "YES" then gosub BOX.CHECK
   if "%guild" = "Thief" && "%box_popping" != "NO" then
   {
-    send khri stop
-    send khri start secure
-    waitforre Roundtime|already using|You have not recovered|You strain
+    # send khri stop
+    # send khri start secure
+    # waitforre Roundtime|already using|You have not recovered|You strain
   }
   gosub ARMOR.CHECK
   goto main
