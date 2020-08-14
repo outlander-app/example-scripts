@@ -1,6 +1,6 @@
 var pouch $Gem_Pouch
 var pouch.container $primary.container
-var gem.container $secondary.container
+var gem.container $loot.container
 
 if_1 var gem.container %1
 

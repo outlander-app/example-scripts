@@ -67,6 +67,7 @@ teller:
   gosub automapper %teller
   put wealth
   put deposit all %coins
+  waitfor slides a small metal box
   put balance
   waitforre The clerk pages through
   return

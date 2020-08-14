@@ -4,8 +4,8 @@
 #debuglevel 5
 
 ## Character specific variables
-var container1 $primary.container
-var container2 $secondary.container
+var container1 $secondary.container
+var container2 $loot.container
 var containerToUse %container1
 var componentcontainer $primary.container
 var gempouch $gem.pouch

@@ -1,9 +1,10 @@
 #[Skills]:  Scraping Skins and Hides
 
 var item %1
-var speed %2
+var speed normal
+var store_container $secondary.container
 
-put get my scraper in my backpack
+put get my scraper
 
 GETSKIN:
   pause 1
@@ -16,8 +17,8 @@ GETSKIN:
 
 SCRAPE:
   match WAIT ...
-  matchre %3 has been completely cleaned | clean as you can make
-  match %3 beyond repair
+  matchre store_item has been completely cleaned|clean as you can make
+  match store_item beyond repair
   matchre SCRAPE You scrape your|You carefully scrape your|You quickly scrape your
   put scrape $lefthandnoun with scraper %speed
   matchwait
@@ -27,12 +28,8 @@ WAIT:
   pause 1
   goto SCRAPE
 
-lootsack:
-  put put my %item in my lootsack
-  goto GETSKIN
-
-backpack:
-  put put my %item in my backpack
+store_item:
+  put put my %item in my %store_container
   goto GETSKIN
 
 HELP:

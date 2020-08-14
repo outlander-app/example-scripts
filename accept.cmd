@@ -1,7 +1,7 @@
 debuglevel 5
 
 var person %1
-var container backpack
+var container $primary.container
 
 wait_for_give:
   waitforre %person offers you

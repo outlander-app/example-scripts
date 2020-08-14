@@ -10,7 +10,7 @@ var saw $engineer.saw
 START:
 
 action var yards $1 when \((\d+) pieces\)$
-action var yards 1 when \(1 pieces\)$
+action var yards 1 when \(1 piece\)$
 action var have $1 when You count out (\d+) pieces of material there\.$
 
 if_2 goto %2
@@ -122,15 +122,17 @@ Mark2:
 
 swap.tool:
   var tool $0
-  if !contains("$lefthand" != "%tool") then
+  if !contains("$lefthand", "%tool") then
   {
-    if ("$lefthand" != "Empty") then gosub stow.tool
+	  if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
-    matchre RETURN You get|You remove
-    #if "%has_craft_belt" = "YES" then put untie my %tool
-    #else put get my %tool
-    put untie my %tool from %belt
+    matchre RETURN You get|You remove|You untie
+
+    if "%has_craft_belt" = "YES" then { put untie my %tool from my %belt }
+    else { put get my %tool }
+
+    if "%has_craft_belt" = "YES" then { put untie my %tool }
     put get my %tool in my %container
     matchwait 5
     goto done
@@ -139,11 +141,14 @@ swap.tool:
   return
 
 stow.tool:
+  if "$lefthand" = "Empty" then return
+
+  put stop play
   pause 0.5
   matchre RETURN You attach|You put|Tie what
   matchre stow.tool.2 doesn't seem to fit
-  if "%has_craft_belt" = "YES" then put tie my $lefthandnoun to my %belt
-  else put put my $lefthandnoun in my %container
+  if "%has_craft_belt" = "YES" then { put tie my $lefthandnoun to my %belt }
+  else { put put my $lefthandnoun in my %container }
   matchwait
 
 stow.tool.2:

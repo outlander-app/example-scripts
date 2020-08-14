@@ -82,7 +82,8 @@ Study:
   matchre Study \.\.\.wait|you may only type ahead
   matchre CheckExp You now feel ready|how metal weapon tempering works
   put study my book
-  matchwait
+  matchwait 10
+  goto CheckExp
 
 CheckExp:
   if $Scholarship.LearningRate >= %maxexp then goto Done

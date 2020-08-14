@@ -1,5 +1,6 @@
 var bag kit
 var skin $skinning_skin
+var skill First_Aid
 
 if_1 then goto %1
 
@@ -27,7 +28,7 @@ repair:
   goto repair
 
 checkExp:
-  if ($Skinning.LearningRate >= 33) then goto done
+  if ($%skill.LearningRate >= 33) then goto done
   goto skin
 
 done:

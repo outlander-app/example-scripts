@@ -12,9 +12,14 @@ put get my %type logbook
 
 ask:
   put %alias %person
-  waitforre ^HAVE WORKORDER
+  matchre untie ^UNTIE WORKORDER
+  matchre bundle ^HAVE WORKORDER
+  matchwait
+
+bundle:
   put .bundlewo %item
   waitforre ^BUNDLE DONE
+  goto give
 
 give:
   match incomplete The work order isn't yet complete

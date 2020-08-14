@@ -4,8 +4,8 @@
 ## customizable variables
 
 var cambItem $camb_item
-var spellPrep With tense movements you|You begin chanting|With rigid movements
-var spellCast gesture
+var spellPrep With tense movements you|You begin chanting|With rigid movements|You raise your palms skyward|motes of sanguine light swirl briefly about your fingertips
+var spellCast gesture|place your hands|You whisper
 
 
 ##########################################
@@ -79,7 +79,7 @@ Start:
 Charge:
     match Charge2 Roundtime
     match HoldArmband Try though you may
-    match Wait ...
+    matchre Wait \.\.\.|may only type ahead
     match WaitCharge1 You strain, but lack the mental stamina
     put charge my %cambItem %3
     matchwait
@@ -95,7 +95,7 @@ HoldArmband:
 Charge2:
     match WaitCharge2 You strain, but lack the mental stamina
     match Focus Roundtime
-    match Wait2 ...
+    matchre Wait2 \.\.\.|may only type ahead
     put charge my %cambItem %3
     matchwait
 
@@ -155,6 +155,7 @@ Cast:
     Cast.Do:
         matchre ManaCheck You strain
         matchre ExpCheck %spellCast
+        match ExpCheck have a spell prepared
         put cast
         matchwait 2
         goto Cast.Do
@@ -189,3 +190,4 @@ End:
     pause
     put wear my %cambItem
     put #parse MAGIC DONE
+    # send hide

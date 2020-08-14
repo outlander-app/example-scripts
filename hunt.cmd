@@ -10,8 +10,8 @@
 #
 var health_threshold 50
 var fatigue_threshold 70
-var should_loot_coins YES
-var should_loot_gems YES
+var should_loot_coins NO
+var should_loot_gems NO
 var should_loot_boxes NO
 var loot_option loot
 var arrange 5
@@ -60,6 +60,8 @@ var last_prayer_timestamp 0
 var should_hunt NO
 var hunt_timer 75
 var drop_skins NO
+var preserve NO
+var dissect NO
 
 var brawl NO
 var brawling_move_count 0
@@ -68,7 +70,8 @@ eval brawling_moves_max countsplit("%brawling_moves", "|")
 #
 #  Critter variables
 #
-var skinnablecritters rat|hog|goblin|boar|eel|bobcat|cougar|reaver|wolf|snowbeast|gargoyle|togball|ape|tusky|wyvern
+var skinnablecritters rat|hog|goblin|boar|eel|bobcat|cougar|reaver|wolf|rock troll|snowbeast|gargoyle|togball|ape|tusky|wyvern
+var all_critters rat|lout|hog|goblin|boar|eel|bobcat|cougar|reaver|wolf|rock troll|snowbeast|gargoyle|togball|ape|tusky|wyvern
 
 #
 #  Actions
@@ -214,6 +217,7 @@ tm:
   var tm_mana %1
   return
 
+box:
 boxes:
   var should_loot_boxes YES
 
@@ -223,15 +227,53 @@ boxes:
 
   return
 
+coin:
+coins:
+  var should_loot_coins YES
+
+  echo
+  echo *** Looting Coins ***
+  echo
+
+  return
+
+gem:
+gems:
+  var should_loot_gems YES
+
+  echo
+  echo *** Looting Gems ***
+  echo
+
+  return
+
+preserve:
+  var preserve YES
+
+  echo
+  echo *** Preserving Corpses ***
+  echo
+
+  return
+
+dissect:
+  var dissect YES
+
+  echo
+  echo *** Dissecting Corpses ***
+  echo
+
+  return
+
 wield:
 
   if "%weapon" = "log" || "%weapon" = "rock" then goto appraise_weapon
 
-  matchre appraise_weapon You draw|You slip|already holding|You deftly
+  matchre appraise_weapon You draw|You slip|already holding|You deftly|With fluid and stealthy movements you draw
   matchre remove_weapon remove it first
   matchre no_weapon Wield what?
   matchre get_weapon as it is lying at your feet
-  send wield %weapon
+  send wield my %weapon
   matchwait
 
 get_weapon:
@@ -336,7 +378,7 @@ attack:
 
   matchre check_loot Roundtime
   matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
-  match do_get_thrown What are you trying to throw
+  matchre do_get_thrown What are you trying to throw|What are you trying to lob|What are you trying to hurl
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
   matchwait 3
@@ -395,7 +437,7 @@ aim:
   matchre return best shot possible now|begin to target|You shift your
   matchre wait_for_mobs ^There is nothing else to face!|^What are you trying to attack
   send aim
-  matchwait 5
+  matchwait 2
   goto aim
 
 aim.fire:
@@ -502,17 +544,36 @@ stalk:
   matchwait
 
 check_loot:
+  gosub clear
   gosub get_thrown
   gosub health
-  if matchre("$roomobjs", "(%skinnablecritters) ((which|that) appears dead|\(dead\))") then gosub skin
-  if matchre("$roomobjs", "((which|that) appears dead|\(dead\))") then {
-    gosub stats
-    send %loot_option
-    gosub handle_loot
-    if %is_ranged = YES {
-      gosub gather_ammo
-      gosub check_exp
+
+  if matchre("$roomobjs", "((which|that) appears dead|\(dead\))") then
+  {
+    if "%preserve" != "NO" then
+    {
+        put .preserve preserve
+        waitforre ^PRESERVE DONE
     }
+
+    if "%dissect" != "NO" then
+    {
+        put .preserve dissect
+        waitforre ^PRESERVE DONE
+    }
+  }
+
+  if matchre("$roomobjs", "(%skinnablecritters) ((which|that) appears dead|\(dead\))") then { gosub skin }
+
+  if matchre("$roomobjs", "((which|that) appears dead|\(dead\))") then
+  {
+    gosub do_loot
+
+    after_loot:
+      if %is_ranged = YES {
+        gosub gather_ammo
+        gosub check_exp
+      }
   }
 
   if %is_ranged != YES {
@@ -520,6 +581,7 @@ check_loot:
   }
 
   gosub fatigue
+
   goto %last_combat
 
 get_thrown:
@@ -530,7 +592,7 @@ get_thrown:
 
   if %is_thrown = YES then put get my %weapon
 
-  return
+  goto RETURN
 
 get_invoke:
   matchre RETURN suddenly leaps|any bonds to invoke
@@ -662,7 +724,7 @@ show_stats:
 
 skin:
   gosub do_arrange
-  send skin
+  gosub do_skin
   pause 1.5
   # if $righthand != %weapon then send empty right
   # if $lefthand != %weapon then send empty left
@@ -674,6 +736,17 @@ skin:
   }
   return
 
+do_skin:
+  match wait_skin ...
+  matchre RETURN Roundtime|Skin what
+  put skin
+  matchwait 5
+  goto do_skin
+
+wait_skin:
+  pause 1
+  goto do_skin
+
 do_arrange:
   var count 0
   arrange.loop:
@@ -681,7 +754,7 @@ do_arrange:
       matchre RETURN You complete arranging|That has already been arranged as much as you can manage|Arrange what
       matchre arrange_add Roundtime
       put %arrange_action
-      matchwait 3
+      matchwait 2
       goto arrange.loop
     }
   return
@@ -690,19 +763,37 @@ arrange_add:
   math count add 1
   goto arrange.loop
 
-handle_loot:
+do_loot:
+  match wait_loot ...
+  match RETURN could not find what you were referring
+  matchre handle_loot You search
+  put %loot_option
+  matchwait 5
+  goto do_loot
+
+wait_loot:
   pause 1
-  if %should_loot_coins = YES then {
+  goto do_loot
+
+
+handle_loot:
+  gosub stats
+
+  if %should_loot_coins = YES then
+  {
     gosub loot_coins
   }
 
-  if %should_loot_gems = YES then {
+  if %should_loot_gems = YES then
+  {
     gosub loot_gems
   }
 
-  if %should_loot_boxes = YES then {
+  if %should_loot_boxes = YES then
+  {
     gosub loot_boxes
   }
+
   return
 
 loot_coins:

@@ -15,6 +15,11 @@ if_2 then
 
 goto %item
 
+band:
+  var itemDesc a bone band
+  gosub book 9
+  goto %carvespeed
+
 javelin:
   var itemDesc a bone javelin
   gosub book 8

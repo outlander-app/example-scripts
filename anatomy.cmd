@@ -4,6 +4,7 @@ var primary.container $primary.container
 var compendium $compendium
 var anatomy.start $anatomy.start
 var anatomy.stop $anatomy.stop
+var skill Empathy
 
 put get my %compendium
 put turn my %compendium to %anatomy.start
@@ -32,7 +33,7 @@ TURN:
 CheckEXP:
   pause 1
   gosub Crystal
-  if ($First_Aid.LearningRate >= 34) then goto END
+  if ($%skill.LearningRate >= 34) then goto END
   goto STUDY
 
 Crystal:

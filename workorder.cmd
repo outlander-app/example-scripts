@@ -8,11 +8,15 @@ var material %5
 
 Ask:
   pause 0.2
-	matchre Done %material (.*)?%item
-	matchre Ask You seem to recall
-	put ask %person for %toughness %type work
-	matchwait 4
-	goto Ask
+    matchre Done %material (.*)?%item
+    matchre Untie You realize you have items bundled with the logbook
+    matchre Ask You seem to recall
+    put ask %person for %toughness %type work
+    matchwait 4
+    goto Ask
+
+Untie:
+    put #parse UNTIE WORKORDER
 
 Done:
-	put #parse HAVE WORKORDER
+    put #parse HAVE WORKORDER

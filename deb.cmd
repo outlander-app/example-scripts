@@ -32,7 +32,7 @@ Start:
 Prep:
 	pause 0.5
 	matchre Wait wait|You are still stunned
-	matchre Cast With tense movements|You begin chanting
+	matchre Cast With tense movements|You begin chanting|You raise your palms skyward
 	matchre CastA already fully prepared
 	put prep %1 %2
 	matchwait
