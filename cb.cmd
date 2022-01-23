@@ -1,39 +1,55 @@
 #
-# Requires Outlander 0.10.11 or higher
+# Requires Outlander 2.0.30 or higher
 #
 
-# debug 5
+debug 5
 
 put #class -app -analyze +combat
 
-var weapons Targeted_Magic|Bow|Brawling|Large_Edged|Small_Edged
-var options tm ec 17 blade|snipe longbow|brawl "hara.axe"|"hara.axe"|ambush blade
-var stance ps|ss|ss|ss|ps
+var exp_threshold 5
+var max_exp 32
+
+var weapons Targeted_Magic|Bow|Brawling|Large_Edged|Small_Edged|Heavy_Thrown
+var options tm ec 20 blade|snipe longbow|brawl "hara.axe"|"hara.axe"|blade|debil df 20 lob throwing.hammer
+var stance ps|ss|ss|ss|ps|ss
 
 if_1 then
 {
   var weapons Bow|Large_Edged|Small_Edged
-  var options snipe longbow|"hara.axe"|ambush blade
+  var options snipe longbow|hara.axe|ambush blade
   var stance ss|ss|ps
 }
 
-#var weapons Twohanded_Blunt|Staves
-#var options maul|nightstick
-#var stance ss|ss
+if_2 then
+{
+  var weapons Crossbow|Slings|Targeted_Magic|Heavy_Thrown|Polearms|Offhand_Weapon|Twohanded_Edged|Twohanded_Blunt|Staves|Light_Thrown|Large_Blunt
+  var options slingbow|slingshot|tm ec 20 blade|debil df 20 lob throwing.hammer|debil df 20 spear|debil df 20 offhand mace|debil df 20 greataxe|debil df 20 maul|debil df 20 cap.bar|debil df 20 lob throwing.axe|debil df 20 throwing.hammer
+  var stance ss|ss|ps|ss|ps|ss|ss|ps|ss|ps|ss|ss|ps
+}
 
-var exp_threshold 5
-var max_exp 32
+if "$combat_run" == "2" then
+{
+  var weapons Small_Edged|Offhand_Weapon|Light_Thrown|Bow|Polearms|Large_Blunt|Small_Blunt|Brawling|Heavy_Thrown
+  var options wakizashi|offhand tonfa|lob "carving knife"|poach shortbow|spear|hammer|mace|brawl wakizashi|lob spear
+  var stance ps|ss|ss|ss|ps|ps|ss|ps|ss
+
+  var exp_threshold 10
+}
+
+#action var weapon $1;var current_weapon $2 when ^EXPTRACKER (.+) (-?\d+)
 
 eval weapons_count countsplit(%weapons, "|")
 var current_weapon 0
 
 
 Combat:
-
   if %exp_threshold > %max_exp then goto End
 
-  pause 0.5
-  gosub WhatWeapon
+  send 0.5 /tracker lowest %weapons
+  waitforre ^EXPTRACKER (.+) (-?\d+)
+  var weapon $1
+  var current_weapon $2
+  #echo lowest weapon is %weapon option is %options[%current_weapon]
 
   if $%weapon.LearningRate >= %exp_threshold then {
 
@@ -51,51 +67,28 @@ Combat:
   echo
   echo Starting %weapons[%current_weapon]
   echo
-  pause
 
   gosub Hunt
 
-  pause
-
   goto Combat
-
-WhatWeapon:
-  var temp_start 0
-  var temp_weapon %weapons[0]
-  var min 0
-
-  WhatWeapon.Loop:
-    math temp_start add 1
-    if %temp_start >= %weapons_count then {
-      var current_weapon %min
-      var weapon %weapons[%current_weapon]
-      var opts %options[%current_weapon]
-      return
-    }
-
-    var next_weapon %weapons[%temp_start]
-    if $%next_weapon.LearningRate < $%temp_weapon.LearningRate then {
-      var min %temp_start
-      var temp_weapon %weapons[%min]
-    }
-
-    goto WhatWeapon.Loop
-
 
 Hunt:
   var opts %options[%current_weapon]
   send %stance[%current_weapon]
+  var temp %exp_threshold
+  math temp add 2
   echo
-  echo atk exp %exp_threshold %opts
+  echo atk exp %temp %opts
   echo
-  put atk exp %exp_threshold %opts
+  pause 1
+  # atk is an alias for '.hunt'
+  put atk exp %temp %opts
   waitforre ^HUNT DONE
   send ss
   return
 
 
 End:
-
   send ss
 
   put #class +app +analyze -combat

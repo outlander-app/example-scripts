@@ -41,20 +41,19 @@ Top:
   if %yards = %have then goto GetBook
   if %yards > %have then goto NotEnough
   put stow book
-  put mark my %material at %yards
   match CutLumber You count out
   match NotEnough There is not enough
+  put mark my %material at %yards
   matchwait
 
 CutLumber:
-  pause 0.5
-  var orig_has_craft_belt %has_craft_belt
-  var has_craft_belt NO
+  #var orig_has_craft_belt %has_craft_belt
+  #var has_craft_belt NO
   gosub swap.tool scissors
   put cut my %material with my scissors
   waitfor You carefully cut
   gosub stow.tool
-  var has_craft_belt %orig_has_craft_belt
+  #var has_craft_belt %orig_has_craft_belt
   put stow right
   waitfor You put
   put get my %material
@@ -224,7 +223,7 @@ swap.tool:
     if "%has_craft_belt" = "YES" then { put untie my %tool from %belt }
     else { put untie my %tool }
     put get my %tool in my %container
-    matchwait 5
+    matchwait 500
     goto done
   }
   pause 0.5

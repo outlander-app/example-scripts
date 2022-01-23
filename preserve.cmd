@@ -2,12 +2,6 @@
 
 var action %1
 
-if $Thanatology.LearningRate >= 30 then goto done
-
-check_preserve:
-  if $Obfuscation != 1 then goto print_need_obfuscation
-  goto set_creature
-
 set_creature:
 
     var disectmobs $roomobjs
@@ -15,17 +9,16 @@ set_creature:
 
     var mobstotal
 
-    var ordinal first|second|third|fourth|fifth|sixth
-    eval disectmobs replacere("%disectmobs", "You also see ", "")
-    eval disectmobs replacere("%disectmobs", " and some junk", "")
-    eval disectmobs replacere("%disectmobs", " and ", ", ")
-    eval disectmobs replacere("%disectmobs", "\.", "")
-    eval disectmobs replacere("%disectmobs", ", ", "|")
+    var ordinal first|second|third|fourth|fifth|sixth|seventh
+    eval disectmobs replace("%disectmobs", "You also see ", "")
+    eval disectmobs replace("%disectmobs", " and some junk", "")
+    eval disectmobs replace("%disectmobs", " and ", ", ")
+    eval disectmobs replace("%disectmobs", "\.", "")
+    eval disectmobs replace("%disectmobs", ", ", "|")
     eval mobstotal countsplit("%disectmobs", "|")
     var mobcurrent 0
 
     count:
-        pause 0.5
         if (%mobcurrent >= %mobstotal) then { goto done }
 
         var check %disectmobs[%mobcurrent]
@@ -35,15 +28,9 @@ set_creature:
         goto count
 
 
-print_need_obfuscation:
-  echo ******************
-  echo   No Obfuscation
-  echo ******************
-  goto done
-
 preserve:
     match wait_p ...
-    matchre done This ritual may only be performed on|rendered this corpse unusable
+    matchre done This ritual may only be performed on|rendered this corpse unusable|skinned creature is worthless for your purposes|Rituals do not work upon constructs|while it is still alive|You'll learn nothing further of value
     matchre done You bend|You carefully|already been preserved|Roundtime
 
     put #parse @%disectmobs[%mobcurrent]
@@ -55,11 +42,12 @@ preserve:
     }
     else
     {
-      put perform dissection on %mobname
+      if "$guild" == "Necromancer" then put perform dissection on %mobname
+      else put dissect %mobname
     }
 
-
-    matchwait
+    matchwait 3
+    goto preserve
 
 wait_p:
     pause 0.5

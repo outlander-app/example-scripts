@@ -1,10 +1,15 @@
-send unwrap my %0
-waitforre Roundtime|That area is not tended
+unwrap:
+  pause 0.5
+  matchre unwrap Roundtime
+  matchre tend That area is not tended
+  send unwrap my %0
+  matchwait 1.5
+  goto unwrap
 
 tend:
   pause 0.5
-  matchre done You work carefully at tending your wound|That area has already been tended to
-  matchre done That area is not bleeding
+  matchre tend You work
+  matchre done That area is not bleeding|That area has already been tended to
   send tend my %0
   matchwait 1.5
   goto tend

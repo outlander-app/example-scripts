@@ -15,7 +15,7 @@ skin:
   matchre repair You skillfully peel|Maybe you should REPAIR it
   matchre done The leather looks frayed
   put skin my %skin
-  matchwait 5
+  matchwait 3
   goto skin
 
 repair:
@@ -24,7 +24,7 @@ repair:
   matchre skin isn\'t in need of repair
   matchre done The leather looks frayed
   put repair my %skin
-  matchwait 5
+  matchwait 3
   goto repair
 
 checkExp:

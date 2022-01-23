@@ -7,22 +7,22 @@ var container kit
 var maxexp $Athletics.LearningRate
 math maxexp add 12
 if %maxexp >= 34 then {
-	var maxexp 34
+  var maxexp 34
 }
 
 goto START
 
 maxexp:
-	var maxexp 34
-	return
+  var maxexp 34
+  return
 
 START:
-	if_1 then
-	{
-		gosub %1
-		shift
-		goto START
-	}
+  if_1 then
+  {
+    gosub %1
+    shift
+    goto START
+  }
 
 
 top:
@@ -53,4 +53,4 @@ nope:
 
 end:
   put put my rope in my %container
-	put #parse CLIMB DONE
+  put #parse CLIMB DONE

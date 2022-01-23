@@ -203,8 +203,9 @@ nogrind:
   goto done
 
 grind:
+  pause 0.5
   put push grindstone with %item
-  pause 4
+  pause 2
   goto oil
 
 oil:

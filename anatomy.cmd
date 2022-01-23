@@ -37,7 +37,11 @@ CheckEXP:
   goto STUDY
 
 Crystal:
-  if $concentration >= 100 then send gaze crystal
+  if $concentration >= 100 then
+  {
+    pause 0.5
+    send gaze crystal
+  }
   return
 
 END:

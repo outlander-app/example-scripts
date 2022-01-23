@@ -1,4 +1,4 @@
-debug 5
+#debug 5
 
 var container $primary.container
 var gempouch $gem.pouch
@@ -25,6 +25,11 @@ loop:
 
 app:
   var number %numbers[%loop_count]
+
+  var temp %loop_count
+  math temp add 1
+
+  echo %temp / %pouches
 
   put get my %number %gempouch in my %container
   put app my %gempouch quick

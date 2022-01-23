@@ -1,7 +1,7 @@
 ## Disarming script by Warneck
 ## Updates by Saracus
 
-#debuglevel 5
+debuglevel 5
 
 ## Character specific variables
 var container1 $secondary.container
@@ -163,12 +163,14 @@ main:
     if ("%mode" = "toss") then goto toss_box
     gosub disarm
     if "%harvest" = "YES" then gosub analyze
+    pause 0.5
     if "%multi_trap" = "ON" then goto disarm_sub
   if %use_lockpick_ring = NO then gosub get_Pick
   lock_sub:
     gosub pick_ID
     if ("%mode" = "toss") then goto toss_box
     gosub pick
+    pause 0.5
     if "%multi_lock" = "ON" then goto lock_sub
     gosub put_Away_Pick
   if "%box_popping" != "ON" then
@@ -238,6 +240,8 @@ disarm_ID:
   action (disarm) on
   action (picklock) off
 
+  pause 0.5
+
   var LAST disarm_ID
     matchre rt ^\.\.\.wait|^Sorry, you may only type
     match weapon knuckles
@@ -248,13 +252,14 @@ disarm_ID:
   matchwait
 
 disarm:
+  pause 0.5
   var multi_trap OFF
 disarmIt_Cont:
   var LAST disarmIt_Cont
     matchre rt ^\.\.\.wait|^Sorry, you may only type
+    matchre disarmIt_Cont fumbling fails to disarm|unable to make any progress
     matchre return You are certain the %disarmit is not trapped|Roundtime|You guess it is already disarmed|DISARM HELP for syntax help
     matchre setCareful This is not likely to be a good thing
-    matchre disarmIt_Cont fumbling fails to disarm|unable to make any progress
   put disarm my %disarmit %mode
   matchwait
 
@@ -263,6 +268,7 @@ setCareful:
   goto %LAST
 
 analyze:
+  pause 0.5
   var LAST analyze
     matchre rt ^\.\.\.wait|^Sorry, you may only type
     match analyze You are unable to
@@ -272,6 +278,7 @@ analyze:
   matchwait
 
 harvest:
+  pause 0.5
   var LAST harvest
     matchre rt ^\.\.\.wait|^Sorry, you may only type
     matchre return It appears that none of the trap components are accessible|The mangled remnants|The remnants
@@ -370,6 +377,7 @@ pick_ID:
   matchwait
 
 pick:
+  pause 0.5
   var LAST pick
   var multi_lock OFF
     matchre rt ^\.\.\.wait|^Sorry, you may only type
@@ -378,6 +386,7 @@ pick:
   put pick anal
   matchwait
 pick_Cont:
+  pause 0.5
   if ( %use_lockpick_ring = NO && "$righthand" = "Empty") then gosub get_Pick
   var LAST pick_Cont
     matchre rt ^\.\.\.wait|^Sorry, you may only type
@@ -461,9 +470,6 @@ fix_Lock:
 
 exp_Check:
   if $Locksmithing.LearningRate >= 30 then goto done
-  return
-
-return:
   return
 
 waiting:

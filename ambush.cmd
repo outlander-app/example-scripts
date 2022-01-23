@@ -15,17 +15,16 @@ if (("%guild" = "Thief" || "%guild" = "Ranger") && (%circle >= 50)) then goto St
 else goto Hide
 
 Hide:
-  put hide
   match Hide ...
   match Hide Your attempt to hide fails.
   match Hide notices your
   match Stalk You blend in with your surroundings,
   match Stalk You melt into the background,
   match Stalk Eh?  But you're already hidden!
+  put hide
   matchwait
 
 Stalk:
-  put stalk
   match Stalk ...
   match ADV It would help if you were closer
   matchre Jab You must be hidden first|already stalking
@@ -33,10 +32,10 @@ Stalk:
   match Ambush You are already
   match Hide try being out of sight
   match Stalk Roundtime
+  put stalk
   matchwait
 
 Ambush:
-  put %attack.method
   match Ambush ...
   match ADV It would help if you were closer
   match ADV close enough
@@ -44,6 +43,7 @@ Ambush:
   matchre DebilCheck You leap|You slip|Roundtime
   match Stalk You must be hidden
   matchre SetAmbush You can't backstab that|political backbiting|You'll need something a little lighter|Ambush what?
+  put %attack.method
   matchwait
 
 SetAmbush:
@@ -51,24 +51,24 @@ SetAmbush:
   goto Ambush
 
 Parry:
-  put parry
   match Parry ...
   match Hide You are
   match Hide You move
+  put parry
   matchwait
 
 Jab:
-  put attack
   match Jab ...
   match Check you
   match END There is nothing else
+  put attack
   matchwait
 
 
 ADV:
-  put advance
   match Ambush You close to melee
   match Check stops you from advancing any farther!
+  put advance
   matchwait
 
 

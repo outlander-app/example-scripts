@@ -16,6 +16,7 @@ HoldArmband:
   goto Charge
 
 Charge2:
+  pause 0.5
   var LAST Charge2
   put charge my %cambItem %3
   match Prep Roundtime
@@ -42,12 +43,13 @@ Prep:
   goto Focus
 
 Focus:
+  matchre Concentrate Roundtime|You reach for
   put invoke my %cambItem spell
-  waitfor Roundtime
-  goto Concentrate
+  matchwait 3
+  goto Focus
 
 Concentrate:
-  put power
+  send power
   goto Cast
 
 Cast:
@@ -55,7 +57,7 @@ Cast:
   pause 1
   put wear my %cambItem
   put cast %4
-  waitfor You
+  waitforre You|Your spell
   goto End
 
 End:

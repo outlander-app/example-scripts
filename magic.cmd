@@ -5,7 +5,7 @@
 
 var cambItem $camb_item
 var spellPrep With tense movements you|You begin chanting|With rigid movements|You raise your palms skyward|motes of sanguine light swirl briefly about your fingertips
-var spellCast gesture|place your hands|You whisper
+var spellCast gesture|place your hands|You whisper|backfires
 
 
 ##########################################
@@ -93,6 +93,7 @@ HoldArmband:
     goto Charge
 
 Charge2:
+    pause 0.5
     match WaitCharge2 You strain, but lack the mental stamina
     match Focus Roundtime
     matchre Wait2 \.\.\.|may only type ahead
@@ -125,9 +126,9 @@ StopPlay:
     goto Prep
 
 Focus:
-    put invoke my %cambItem spell
     match Concentrate Roundtime
     match Wait3 ...
+    put invoke my %cambItem spell
     matchwait
 
 Wait3:
@@ -137,7 +138,7 @@ Wait3:
 Concentrate:
     match Cast Roundtime
     match Cast ...
-    put power
+    send power
     matchwait 2
     goto Cast
 
@@ -150,7 +151,7 @@ Cast:
     }
     else
     {
-        pause 7
+        pause 3
     }
     Cast.Do:
         matchre ManaCheck You strain

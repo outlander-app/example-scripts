@@ -4,6 +4,7 @@ put get my %0
 waitforre You get|You are already
 
 top:
+  pause 0.5
   matchre checkExp Roundtime
   matchre get.pick Find a more appropriate tool and try again
   matchre end not even locked

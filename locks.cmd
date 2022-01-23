@@ -24,13 +24,13 @@ pick:
   matchre done The lock feels warm|you are not making any progress|The lock looks weak
   put lock my %box
   put pick my %box with my lockpick
-  matchwait 5
+  matchwait 2
 
 checkExp:
   if ($Locksmithing.LearningRate >= 33) then goto done
   goto pick
 
 done:
-  pause 1
+  pause
   put stow my lockpick
   put put my %box in my %bag

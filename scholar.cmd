@@ -1,3 +1,5 @@
+# debug 5
+
 var chap 1
 var page 1
 
@@ -25,6 +27,8 @@ START:
     shift
     goto START
   }
+
+START2:
 
 echo ****************************************
 echo ** For this script to work, you will need a weaponsmithing book and Bones (music instrument)
@@ -56,6 +60,7 @@ Chap:
   matchwait
 
 Page:
+  pause 0.5
   match Page ...wait
   match Study You turn your book
   match Study You are already on

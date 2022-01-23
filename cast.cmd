@@ -1,10 +1,15 @@
 #[Magic]: Cast spell at full preparedness
 
 matchre CAST You feel fully prepared|formation of a targeting pattern
-matchwait 60
+matchwait 70
 goto END
 
 CAST:
-put cast %1 %2
+    pause 0.1
+    match CAST ...
+    matchre END You gesture|have a spell
+    put cast %1 %2
+    matchwait 1
+    goto CAST
 
 END:

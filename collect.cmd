@@ -1,12 +1,10 @@
-#debug 5
+# debug 5
 
 var maxexp 34
 var item %1
 var skill Outdoorsmanship
 
-if_3 then {
-  var skill Perception
-}
+if_3 then var skill Perception
 
 Collect:
   match Kick You manage to collect
@@ -30,10 +28,11 @@ Wait2:
   goto Kick
 
 Kick:
-  put kick %1
+  pause 0.5
   matchre CheckEXP You take a step back|Now what did the|I could not find
   match Wait2 ...wait
-  matchwait 20
+  put kick %1
+  matchwait 3
 
 CheckEXP:
   pause 0.2

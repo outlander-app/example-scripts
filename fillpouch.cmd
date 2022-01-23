@@ -1,3 +1,5 @@
+debug 5
+
 var pouch $Gem_Pouch
 var pouch.container $primary.container
 var gem.container $loot.container

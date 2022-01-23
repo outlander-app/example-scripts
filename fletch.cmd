@@ -1,4 +1,4 @@
-debuglevel 5
+# debuglevel 5
 
 var item %1
 var itemDesc
@@ -60,7 +60,8 @@ iceadder:
   var itemDesc ice-adder arrows
   var item ice-adder
   var material shafts
-  var item.container quiver
+  var item.container fletching kit
+  var primary.container fletching kit
   var shapeaction arrows
   gosub book 5
   goto get.lumber

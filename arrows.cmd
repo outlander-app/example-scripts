@@ -1,7 +1,8 @@
-#debug 5
+debug 5
 
 var arrowhead %1
 var container $primary.container
+var fletch.container kit
 var belt carpenter's belt 
 var has_craft_belt $has_shaping_craft_belt
 var mark ON
@@ -56,12 +57,15 @@ Get.Knife:
   if "%need_arrowhead" = "YES" then gosub Arrowhead
   if "%need_flights" = "YES" then gosub Flights
   gosub swap.tool carving knife
-  var tool rasp
+  var tool carving knife
   pause 0.5
 Carve:
   save Carve
   put carve my $righthandnoun with my knife
   goto fletch
+
+Get.Shaper.A:
+  var need_arrowhead YES"
 
 Get.Shaper:
   pause 1
@@ -104,6 +108,7 @@ Mark:
 Arrowhead:
   pause 0.5
   gosub swap.tool %arrowhead arrowheads
+  #put get my %arrowhead arrowheads in my %fletch.container
   put assemble my arrows with my arrowhead
   waitforre You place
   var need_arrowhead NO
@@ -113,33 +118,36 @@ Arrowhead:
 Flights:
   pause 0.5
   gosub swap.tool flights
+  #put get my flights
   put assemble my arrows with my flights
   waitforre You place
   var need_flights NO
   pause 0.5
+  #send put my flights in my %fletch.container
   return
 
 swap.tool:
   var tool $0
-  if !contains("$lefthand", "%tool") then
-  {
-    if ("$lefthand" != "Empty") then { gosub stow.tool }
-    pause 0.5
-    matchre %last \.\.\.wait|Sorry
-    matchre RETURN You get|You remove|You untie
-    if "%has_craft_belt" = "YES" then { put untie my %tool from %belt }
-    else { put untie my %tool }
-    put get my %tool in my %container
-    matchwait 5
-    goto done
-  }
+  if contains("$lefthand", "%tool") then return
+
+  if "$lefthand" != "Empty" then gosub stow.tool
   pause 0.5
+  matchre %last \.\.\.wait|Sorry
+  matchre RETURN You get|You remove|You untie
+
+  if "%has_craft_belt" == "YES" then put untie my %tool from %belt
+  else put untie my %tool
+
+  if matchre("%tool", "glue|shaft|arrowhead|flights") then put get my %tool in my %fletch.container
+  else put get my %tool in my %container
+  matchwait 5
   return
 
 stow.tool:
   pause 0.5
   matchre RETURN You attach|You put|Tie what
   matchre stow.tool.2 doesn't seem to fit
+  if matchre("$lefthand", "glue|shaft|arrowhead|flights") then put put my $lefthandnoun in my %fletch.container
   if "%has_craft_belt" = "YES" then put tie my $lefthandnoun to my %belt
   else put put my $lefthandnoun in my %container
   matchwait
@@ -148,11 +156,7 @@ stow.tool.2:
   put put my $lefthandnoun in my %container
   return
 
-RETURN:
-  pause 0.5
-  return
-
 done:
   gosub stow.tool
-  put stow my shafts
+  put stow my shafts in my %fletch.container
   put #parse WOODWORK DONE

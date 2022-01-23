@@ -27,7 +27,7 @@ HOLD:
 
 HOLD.WEAR:
     var inv.action WEAR
-    if $righthand = Empty then put swap
+    if "$righthand" = "Empty" then put swap
     goto REPAIR.MAIN
 
 WEAR.ITEM:
