@@ -1,4 +1,4 @@
-debuglevel 5
+#debuglevel 5
 
 var count %1
 var item %2

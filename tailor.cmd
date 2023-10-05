@@ -1,4 +1,3 @@
-
 debuglevel 5
 
 var item %1
@@ -132,6 +131,18 @@ fpad:
   var item pad
   goto %sewspeed
 
+netting:
+  var itemDesc reinforced netting
+  var sewspeed instructions
+  var item netting
+  goto %sewspeed
+
+outfit:
+  var itemDesc outfit
+  var sewspeed instructions
+  var item netting
+  goto %sewspeed
+
 book:
   var chapter $1
   put get my tailoring book
@@ -164,6 +175,12 @@ sew:
 
 sewfast:
   send .lwfast %item
+  waitforre ^LW DONE
+  pause 0.5
+  goto checkCount
+
+instructions:
+  send .lwfast %item instructions
   waitforre ^LW DONE
   pause 0.5
   goto checkCount

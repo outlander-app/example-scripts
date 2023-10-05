@@ -11,6 +11,7 @@ var coinage kronar
 if "$zoneid" == "1" then goto crossing
 if "$zoneid" == "67" then goto shard
 if "$zoneid" == "30" then goto riverhaven
+if "$zoneid" == "116" then goto hib
 
 echo *** No bank configured for zone $zoneid ***
 goto end
@@ -51,6 +52,14 @@ shard:
   gosub teller %coinage
   gosub check_withdraw
   move south
+  goto end
+
+hib:
+  var coinage dokora
+  gosub automapper %exchange
+  gosub do_exchange dokora kronar lirum
+  gosub teller %coinage
+  gosub check_withdraw
   goto end
 
 riverhaven:

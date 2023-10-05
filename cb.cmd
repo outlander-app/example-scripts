@@ -1,6 +1,11 @@
 #
 # Requires Outlander 2.0.30 or higher
 #
+# This script uses aliases
+# ps = stance set 100 79 1
+# ss = stance set 100 1 79
+# atk = .hunt coins boxes $0
+# 
 
 debug 5
 
@@ -12,6 +17,10 @@ var max_exp 32
 var weapons Targeted_Magic|Bow|Brawling|Large_Edged|Small_Edged|Heavy_Thrown
 var options tm ec 20 blade|snipe longbow|brawl "hara.axe"|"hara.axe"|blade|debil df 20 lob throwing.hammer
 var stance ps|ss|ss|ss|ps|ss
+
+# var weapons Targeted_Magic|Brawling|Large_Edged|Small_Edged|Heavy_Thrown
+# var options tm ec 20 blade|brawl "hara.axe"|"hara.axe"|blade|debil df 20 lob throwing.hammer
+# var stance ps|ss|ss|ps|ss
 
 if_1 then
 {
@@ -29,9 +38,9 @@ if_2 then
 
 if "$combat_run" == "2" then
 {
-  var weapons Small_Edged|Offhand_Weapon|Light_Thrown|Bow|Polearms|Large_Blunt|Small_Blunt|Brawling|Heavy_Thrown
-  var options wakizashi|offhand tonfa|lob "carving knife"|poach shortbow|spear|hammer|mace|brawl wakizashi|lob spear
-  var stance ps|ss|ss|ss|ps|ps|ss|ps|ss
+  var weapons Targeted_Magic|Small_Edged|Offhand_Weapon|Light_Thrown|Bow|Polearms|Large_Blunt|Small_Blunt|Brawling|Heavy_Thrown
+  var options tm stra 10 wakizashi|wakizashi|offhand tonfa|lob "carving knife"|poach shortbow|spear|hammer|mace|brawl wakizashi|lob spear
+  var stance ps|ps|ss|ss|ss|ps|ps|ss|ps|ss
 
   var exp_threshold 10
 }

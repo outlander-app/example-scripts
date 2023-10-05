@@ -1,4 +1,4 @@
-debug 5
+#debug 5
 
 var bag kit
 var box $training_box

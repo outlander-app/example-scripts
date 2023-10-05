@@ -42,7 +42,7 @@ preserve:
     }
     else
     {
-      if "$guild" == "Necromancer" then put perform dissection on %mobname
+      if "$guild" == "Necromancer" && $Thanatology.LearningRate < 32 then put perform dissection on %mobname
       else put dissect %mobname
     }
 

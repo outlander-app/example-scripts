@@ -26,141 +26,165 @@ var item %1
 
 if_2 then goto %2
 
+var study_item tailor book
+
 Glance:
-	matchre Get.Needle %item
-	matchre HaveCloth cloth
-	matchre HaveSilk silk
-	matchre HaveLeather leather
-	matchre NotEnough Both of your hands are empty
-	put inv held
-	matchwait 5
-	goto done
+    matchre Get.Needle %item
+    matchre HaveCloth cloth
+    matchre HaveSilk silk
+    matchre HaveLeather leather
+    matchre NotEnough Both of your hands are empty
+    put inv held
+    matchwait 5
+    goto done
 
 HaveCloth:
-	var material cloth
-	goto top
+    var material cloth
+    goto top
 HaveSilk:
-	var material silk
-	goto top
+    var material silk
+    goto top
 HaveLeather:
-	var material leather
-	goto top
+    var material leather
+    goto top
+
+instructions:
+  var study_item instructions
+  var material cloth
+  pause 0.5
+  put get my instructions;read my instructions
+  pause 1
+  put count my %material
+  pause 0.5
+  if %yards = %have then goto GetBook
+  if %yards > %have then goto NotEnough
+  put stow instructions
+  waitforre ^You put your instructions
+  put mark my %material at %yards yards
+  match CutLeather You count out
+  match NotEnough There is not enough
+  matchwait
 
 top:
-	put get tailor book
-	pause 0.5
-	put read my book;count my %material
-	waitfor A list of
-	pause 0.5
-	if %yards = %have then goto GetBook
-	if %yards > %have then goto NotEnough
-	put stow book
-	waitforre ^You put your book
-	put mark my %material at %yards yards
-	match CutLeather You count out
-	match NotEnough There is not enough
-	matchwait
+    put get tailor book
+    pause 0.5
+    put read my book;count my %material
+    waitfor A list of
+    pause 0.5
+    if %yards = %have then goto GetBook
+    if %yards > %have then goto NotEnough
+    put stow book
+    waitforre ^You put your book
+    put mark my %material at %yards yards
+    match CutLeather You count out
+    match NotEnough There is not enough
+    matchwait
 
 CutLeather:
   gosub swap.tool scissor
-	put cut my %material with my scissor
-	waitfor You carefully cut
-	gosub stow.tool scissor
-	put stow right
-	waitfor You put
-	put get my %material
-	waitfor You pick up
+    put cut my %material with my scissor
+    waitfor You carefully cut
+    gosub stow.tool scissor
+    put stow right
+    waitfor You put
+    put get my %material
+    waitfor You pick up
 
 GetBook:
-	put get my tailor book;study my book
-	waitfor Roundtime
-	pause 0.5
-	pause 0.5
-	put stow my book
-	waitfor You put
-	gosub swap.tool scissor
+    match GetBook Study them again
+    match DoneBook Roundtime
+    pause 0.5
+    put get my %study_item;study my %study_item
+    matchwait
+
+DoneBook:
+    pause 0.5
+    put stow my %study_item
+    waitfor You put
+    gosub swap.tool scissor
+    goto FirstCut
 
 FirstCut:
-	put cut my %material with my scissor
-	goto Matches
+    put cut my %material with my scissor
+    goto Matches
 
 Matches:
-	matchre %s ...wait|Sorry
-	match Get.Awl needs holes punched
-	matchre Get.Needle Roundtime|must be holding the sewing needles to do that|That tool does not seem suitable
-	matchre done You cannot figure out how to do that|You realize that cannot be repaired|not damaged enough to warrant repair
-	matchre LargePad You need another finished large cloth padding|reinforced with some large cloth padding
-	match Smallpad You need another finished small cloth padding
-	match Handle You need another finished leather shield handle
-	match LongCord You need another finished long leather cord
-	match MoreThread The needles need to have thread
-	match Get.Needle New seams must now be sewn
-	matchwait
+    matchre %s ...wait|Sorry
+    match Get.Awl needs holes punched
+    matchre Get.Needle Roundtime|must be holding the sewing needles to do that|That tool does not seem suitable
+    matchre done You cannot figure out how to do that|You realize that cannot be repaired|not damaged enough to warrant repair
+    matchre LargePad You need another finished large cloth padding|reinforced with some large cloth padding
+    match Smallpad You need another finished small cloth padding
+    match Handle You need another finished leather shield handle
+    match LongCord You need another finished long leather cord
+    match MoreThread The needles need to have thread
+    match Get.Needle New seams must now be sewn
+    matchwait
 
 MoreThread:
-	put put my needle in my %container;get thread in my %container
-	match Thread You get
-	match NoThread What were you referring to?
-	matchwait 3
-	goto NoThread
+    put put my needle in my %container;get thread in my %container
+    match Thread You get
+    match NoThread What were you referring to?
+    matchwait 3
+    goto NoThread
 
 Thread:
-	put put my thread on needle in my %container
-	waitfor You carefully thread
-	put get needle in my %container
-	goto Sew
+    put put my thread on needle in my %container
+    waitfor You carefully thread
+    put get needle in my %container
+    goto Sew
 
 NoThread:
-	echo
-	echo ########### NO THREAD ###########
-	echo
-	goto done
+    echo
+    echo ########### NO THREAD ###########
+    echo
+    goto done
 
 Sew:
-	save Sew
+    save Sew
   pause 0.5
-	put play $play.song $play.style
-	put push my %item with my sew needle
-	goto Matches
+    put play $play.song $play.style
+    put push my %item with my sew needle
+    goto Matches
 
 Poke:
-	save Poke
+    save Poke
   pause 0.5
-	put poke my %item with my %tool
-	goto Matches
+    put poke my %item with my %tool
+    goto Matches
 
 Measure:
-	save Measure
+    save Measure
   pause 0.5
-	put measure my %item with my yardstick
-	goto Matches
+    put measure my %item with my yardstick
+    goto Matches
 
 Cut:
-	save Cut
+    save Cut
   pause 0.5
-	put cut my %item with my scissor
-	goto Matches
+    put cut my %item with my scissor
+    goto Matches
 
 Rub:
-	save Rub
+    save Rub
   pause 0.5
-	put rub my %item with my slickstone
-	goto Matches
+    put rub my %item with my slickstone
+    goto Matches
 
 Mark:
-	put mark my %item with my stamp
-	waitforre Roundtime|too badly damaged to be used
-	pause 1
-	#put put my stamp in my %container
-	goto done
+    put mark my %item with my stamp
+    waitforre Roundtime|too badly damaged to be used
+    pause 1
+    #put put my stamp in my %container
+    goto done
 
 NotEnough:
-	echo ****** Not Enough Material ******
-	pause
-	if "$righthand" != "Empty" then put put $righthand in my %container
-	if "$lefthand" != "Empty" then gosub stow.tool
-	pause
-	goto done
+    echo ****** Not Enough Material ******
+    pause
+    if "$righthand" != "Empty" then put put $righthand in my %container
+    if "$lefthand" != "Empty" then gosub stow.tool
+    pause
+    goto done
 
 done:
   gosub stow.tool
@@ -188,21 +212,21 @@ Get.Pins:
 
 Get.Scissor:
   var last Get.Scissor
-	pause 1
-	gosub swap.tool scissor
-	goto Cut
+    pause 1
+    gosub swap.tool scissor
+    goto Cut
 
 Get.Slick:
   var last Get.slick
-	pause 1
-	gosub swap.tool slickstone
-	goto Rub
+    pause 1
+    gosub swap.tool slickstone
+    goto Rub
 
 Get.Yard:
   var last Get.Yard
-	pause 1
-	gosub swap.tool yardstick
-	goto Measure
+    pause 1
+    gosub swap.tool yardstick
+    goto Measure
 
 Get.Stamp:
   var last Get.Stamp
@@ -217,7 +241,7 @@ swap.tool:
   var tool $0
   if !contains("$lefthand", "%tool") then
   {
-	  if ("$lefthand" != "Empty") then { gosub stow.tool }
+      if ("$lefthand" != "Empty") then { gosub stow.tool }
     pause 0.5
     matchre %last \.\.\.wait|Sorry
     matchre RETURN You get|You remove|You untie

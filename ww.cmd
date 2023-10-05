@@ -220,7 +220,10 @@ swap.tool:
     pause 0.5
     matchre %last \.\.\.wait|Sorry
     matchre RETURN You get|You remove|You untie
-    if "%has_craft_belt" = "YES" then { put untie my %tool from %belt }
+    if "%has_craft_belt" = "YES" then {
+      put untie my %tool from my %belt
+      put untie my %tool
+    }
     else { put untie my %tool }
     put get my %tool in my %container
     matchwait 500

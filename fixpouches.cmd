@@ -34,7 +34,22 @@ app:
   put get my %number %gempouch in my %container
   put app my %gempouch quick
   waitfor Roundtime
-  goto stow
+  pause 0.5
+  goto fill
+
+fill:
+  matchre tie too valuable to leave untied
+  matchre stow too full to fit any more gems
+  matchre app Encumbrance
+  put fill my %pouch with my %gem.container
+  put enc
+  matchwait 3
+  goto fill
+
+tie:
+  pause
+  put tie my %pouch
+  goto fill
 
 stow:
   match RETURN You put
@@ -46,6 +61,8 @@ stow:
 RETURN:
   return
 
+checkExp:
+  goto loop
+
 end:
-  put sort my %gempouch
-  put #parse APPRAISE DONE
+  put #parse FIX DONE

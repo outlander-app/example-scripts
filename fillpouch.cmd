@@ -8,7 +8,7 @@ if_1 var gem.container %1
 
 put get my %pouch in my %pouch.container
 
-fill: 
+fill:
   matchre tie too valuable to leave untied
   matchre app Encumbrance
   put fill my %pouch with my %gem.container

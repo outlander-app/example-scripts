@@ -26,6 +26,8 @@ var item %1
 
 if_2 then goto %2
 
+var study_item tailor book
+
 Glance:
     matchre Get.Needle %item
     matchre HaveCloth cloth
@@ -46,6 +48,23 @@ HaveLeather:
     var material leather
     goto top
 
+instructions:
+  var study_item instructions
+  var material cloth
+  pause 0.5
+  put get my instructions;read my instructions
+  pause 1
+  put count my %material
+  pause 0.5
+  if %yards = %have then goto GetBook
+  if %yards > %have then goto NotEnough
+  put stow instructions
+  waitforre ^You put your instructions
+  put mark my %material at %yards yards
+  match CutLeather You count out
+  match NotEnough There is not enough
+  matchwait
+
 top:
     put get tailor book
     pause 0.5
@@ -62,7 +81,7 @@ top:
     matchwait
 
 CutLeather:
-  gosub swap.tool scissor
+    gosub swap.tool scissor
     put cut my %material with my scissor
     waitfor You carefully cut
     gosub stow.tool scissor
@@ -72,13 +91,18 @@ CutLeather:
     waitfor You pick up
 
 GetBook:
-    put get my tailor book;study my book
-    waitfor Roundtime
+    match GetBook Study them again
+    match DoneBook Roundtime
     pause 0.5
+    put get my %study_item;study my %study_item
+    matchwait
+
+DoneBook:
     pause 0.5
-    put stow my book
+    put stow my %study_item
     waitfor You put
     gosub swap.tool scissor
+    goto FirstCut
 
 FirstCut:
     put cut my %material with my scissor
@@ -123,26 +147,26 @@ NoThread:
 
 Sew:
     save Sew
-  pause 0.5
+    pause 0.5
     put play $play.song $play.style
     put push my %item with my sew needle
     goto Matches
 
 Poke:
     save Poke
-  pause 0.5
+    pause 0.5
     put poke my %item with my %tool
     goto Matches
 
 Measure:
     save Measure
-  pause 0.5
+    pause 0.5
     put measure my %item with my yardstick
     goto Matches
 
 Cut:
     save Cut
-  pause 0.5
+    pause 0.5
     put cut my %item with my scissor
     goto Matches
 
@@ -226,9 +250,11 @@ swap.tool:
     pause 0.5
     matchre %last \.\.\.wait|Sorry
     matchre RETURN You get|You remove|You untie|already holding
-    if "%has_craft_belt" = "YES" then { put untie my %tool from my %belt }
+    if "%has_craft_belt" = "YES" then {
+      put untie my %tool from my %belt
+      put untie my %tool
+    }
     else { put get my %tool }
-    put untie my %tool
     put get my %tool in my %container
     matchwait 5
     goto done

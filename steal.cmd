@@ -1,5 +1,6 @@
 debug 5
 
+var item
 var money 0
 var denomination
 action var money $1;var denomination $2 when hands you (\d+) (Kronars|Dokoras|Lirums)
@@ -17,12 +18,18 @@ travel:
     var room 205
   }
 
+  # Hibarnhvidar
+  if $zoneid == 116 {
+    var room 54
+  }
+
   gosub go %room
   goto burgle
 
 go:
   var target $0
-  matchre go You can't go there|What were you referring to
+go.retry:
+  matchre go.retry You can't go there|What were you referring to
   matchre return ^YOU HAVE ARRIVED|^AUTOMAPPER ALREADY HERE
   put #goto %target
   matchwait
@@ -44,11 +51,6 @@ pawn:
     pause 0.5
   }
 
-  #if "$lefthandnoun" == "stick" || "$lefthandnoun" == "sieve" || "$lefthandnoun" == "rat" || "$lefthandnoun" == "mouse" then {
-  #  put empty left
-  #  pause 0.5
-  #}
-
   if "$lefthand" == "Empty" then goto end
   gosub go pawn
 
@@ -60,6 +62,10 @@ pawn:
   }
 
   put sell my $lefthandnoun
+
+  if $zoneid == 116 then {
+    put out
+  }
   goto end
 
 end:
@@ -74,6 +80,11 @@ end:
   # Shard
   if $zoneid == 67 {
     var room e tower
+  }
+
+  # Hibarnhvidar
+  if $zoneid == 116 {
+    var room 217
   }
 
   gosub go %room

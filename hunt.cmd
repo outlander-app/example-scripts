@@ -76,7 +76,7 @@ eval brawling_moves_max countsplit("%brawling_moves", "|")
 #
 #  Critter variables
 #
-var skinnablecritters rat|hog|goblin|spider|boar|eel|bobcat|cougar|reaver|wolf|rock troll|snowbeast|gargoyle|steed|togball|leucro|adder|skeleton|ape|tusky|wyvern
+var skinnablecritters rat|hog|goblin|spider|boar|eel|bobcat|cougar|reaver|wolf|rock troll|snowbeast|gargoyle|steed|togball|leucro|adder|skeleton|ape|tusky|wyvern|drake
 
 #
 #  Actions
@@ -404,7 +404,7 @@ attack:
   if $hidden == 0 && %should_stealth == YES then gosub stealth
 
   matchre check_loot Roundtime
-  matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
+  matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer|You must be closer
   matchre do_get_thrown What are you trying to throw|What are you trying to lob|What are you trying to hurl|You must hold
   if %use_offhand == YES then put %attack_style left
   else put %attack_style
@@ -491,14 +491,19 @@ fire:
 load:
   if matchre("$righthand", "riot|repeating") then goto Repeater.Load
 
-  matchre gather_ammo ^You don't have the proper ammunition readily available for your
+  matchre gather_ammo ^You don't have the proper ammunition
   matchre gather_ammo ^You must|your hand jams|^You can not load
   matchre Repeater.Load ammunition chamber|already loaded with as much ammunition as it can hold
   matchre buff_stw Such a feat would be impossible without the winds to guide you
+  matchre change_ranged_action You don't have enough
   matchre return Roundtime|is already
   var FULL_AIM NO
   put load %ranged_action
   matchwait 2
+  goto load
+
+change_ranged_action:
+  var ranged_action
   goto load
 
 buff_stw:
@@ -524,7 +529,7 @@ Repeater.Load.Full:
     math load_count add 1
     if %load_count > %repating_crossbow_ammo_count then goto Repeater.Load
 
-    matchre gather_ammo ^You don't have the proper ammunition readily available for your
+    matchre gather_ammo ^You don't have the proper ammunition
     matchre gather_ammo ^You must|your hand jams|^You can not load
     matchre Repeater.Load already loaded with as much ammunition as it can hold
     matchre Repeater.Load.Full.2 ammunition chamber
@@ -680,7 +685,7 @@ tm_wait:
 tm_prep:
   match RETURN You begin to weave
   match tm_wait nothing else to face
-  matchre tm_quick_cast But you're already preparing a spell|You are already preparing
+  matchre tm_quick_cast But you're already preparing a spell|You are already preparing|You have already
   put target %tm_spell %tm_mana
   matchwait 2
   goto tm_prep
@@ -731,12 +736,11 @@ brawling_attack:
   var attack_style %brawling_moves[%brawling_move_count]
 
   matchre brawling_next_move Roundtime
-  matchre wait_for_mobs There is nothing|close enough to attack|What are you trying to attack|It would help if you were closer
+  matchre wait_for_mobs There is nothing|What are you trying to attack|It would help if you were closer|You must be closer
   if "%use_offhand" == "YES" then put %attack_style left
   else put %attack_style
   matchwait 5
   goto brawling_attack
-  return
 
 brawling_next_move:
   math brawling_move_count add 1
@@ -753,7 +757,7 @@ spell_prep:
   var spell_mana &2
   spell_repeat:
     matchre RETURN %spellPrep
-    matchre spell_quick_cast But you're already preparing a spell|You are already preparing|You have already fully prepared
+    matchre spell_quick_cast But you're already preparing a spell|You are already preparing|You have already fully
     put prepare %spell %spell_mana
     matchwait 2
     goto spell_repeat
@@ -1016,6 +1020,7 @@ abort:
     echo
     echo  *** Seek medical attention!  $health/100  ***
     echo
+    if $standing == 0 then send stand
     send retreat
     send retreat
     pause 3
